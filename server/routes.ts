@@ -46,6 +46,64 @@ async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Prom
   }
 }
 
+// Test API key connectivity
+async function testApiKey(apiKey: string): Promise<{ valid: boolean; message: string; creditsRemaining?: number }> {
+  const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
+  
+  try {
+    // Test with a simple keyword to minimize credit usage
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        country: "US",
+        currency: "USD",
+        dataSource: "gkp",
+        kw: ["test"], // Single test keyword
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      if (response.status === 401) {
+        return { valid: false, message: "Invalid API key - authentication failed" };
+      } else if (response.status === 403) {
+        return { valid: false, message: "API key valid but insufficient credits" };
+      } else if (response.status === 429) {
+        return { valid: false, message: "Rate limit exceeded - try again later" };
+      } else {
+        return { valid: false, message: `API error: ${response.status} ${response.statusText}` };
+      }
+    }
+
+    const data = await response.json();
+    
+    // Check if response has expected structure
+    if (data && typeof data === 'object') {
+      const creditsRemaining = data.credits_remaining || data.creditsRemaining;
+      return { 
+        valid: true, 
+        message: "API key is valid and working correctly",
+        creditsRemaining: creditsRemaining 
+      };
+    } else {
+      return { valid: false, message: "Unexpected API response format" };
+    }
+  } catch (error: any) {
+    console.error("API key test error:", error);
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      return { valid: false, message: "Network connectivity issue - check internet connection" };
+    } else if (error.name === 'AbortError') {
+      return { valid: false, message: "Request timeout - API may be slow" };
+    } else {
+      return { valid: false, message: `Connection error: ${error.message}` };
+    }
+  }
+}
+
 // Mock Keywords Everywhere API call
 async function fetchKeywordData(keywords: string[]): Promise<Map<string, any>> {
   // Simulate API delay
@@ -179,6 +237,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Test API key
+  app.post("/api/admin/test-api-key", async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+      
+      if (!apiKey || typeof apiKey !== 'string') {
+        return res.status(400).json({ message: "API key is required" });
+      }
+
+      const result = await testApiKey(apiKey);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ 
+        valid: false, 
+        message: `Test failed: ${error.message}` 
+      });
     }
   });
   

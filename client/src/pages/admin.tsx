@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff, TestTube } from "lucide-react";
 import { Link } from "wouter";
 import type { Industry, Settings as SettingsType } from "@shared/schema";
 
@@ -50,6 +50,30 @@ export default function Admin() {
     onError: (error: any) => {
       toast({
         title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Test API key mutation
+  const testApiKeyMutation = useMutation({
+    mutationFn: async (apiKey: string) => {
+      const response = await apiRequest("POST", "/api/admin/test-api-key", { apiKey });
+      return response.json();
+    },
+    onSuccess: (data: { valid: boolean; message: string; creditsRemaining?: number }) => {
+      toast({
+        title: data.valid ? "API Key Valid" : "API Key Invalid",
+        description: data.creditsRemaining 
+          ? `${data.message}. Credits remaining: ${data.creditsRemaining}`
+          : data.message,
+        variant: data.valid ? "default" : "destructive",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Test Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -139,6 +163,19 @@ export default function Admin() {
     updateSettingsMutation.mutate({
       keywordsEverywhereApiKey: apiKeyInput.trim(),
     });
+  };
+
+  const handleTestApiKey = () => {
+    const keyToTest = apiKeyInput.trim() || settings?.keywordsEverywhereApiKey;
+    if (!keyToTest) {
+      toast({
+        title: "No API Key",
+        description: "Please enter an API key to test or save one first",
+        variant: "destructive",
+      });
+      return;
+    }
+    testApiKeyMutation.mutate(keyToTest);
   };
 
   const handleCreateIndustry = () => {
@@ -249,6 +286,15 @@ export default function Admin() {
                     {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>
                 </div>
+                <Button
+                  onClick={handleTestApiKey}
+                  disabled={testApiKeyMutation.isPending}
+                  variant="outline"
+                  className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                >
+                  <TestTube size={16} className="mr-2" />
+                  {testApiKeyMutation.isPending ? "Testing..." : "Test"}
+                </Button>
                 <Button
                   onClick={handleSaveSettings}
                   disabled={updateSettingsMutation.isPending}
