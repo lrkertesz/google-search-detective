@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff } from "lucide-react";
@@ -288,6 +288,9 @@ export default function Admin() {
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Create New Industry</DialogTitle>
+                    <DialogDescription>
+                      Create a new industry with a unique name, display label, and keyword list.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
@@ -372,6 +375,9 @@ export default function Admin() {
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Edit Industry</DialogTitle>
+                              <DialogDescription>
+                                Modify the industry details and update the keyword list.
+                              </DialogDescription>
                             </DialogHeader>
                             {editingIndustry && (
                               <div className="space-y-4">

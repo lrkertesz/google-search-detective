@@ -173,9 +173,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertSettingsSchema.parse(req.body);
       const settings = await storage.updateSettings(validatedData);
       
-      // Reset the KWE client when API key changes
-      kweClient = null;
-      
       res.json(settings);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
