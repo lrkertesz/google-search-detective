@@ -318,10 +318,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process results
       const results: KeywordResult[] = [];
       keywordCombinations.forEach(combination => {
-        const parts = combination.split(' ');
-        const city = parts[parts.length - 1];
-        const phrase = parts.slice(0, -1).join(' ');
-        
         const data = keywordData.get(combination);
         if (data) {
           // Determine opportunity level
@@ -333,8 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           results.push({
-            phrase,
-            city,
+            keyword: combination, // Store complete keyword phrase including city
             searchVolume: data.volume,
             cpc: data.cpc,
             competition: data.volume === 0 ? 0 : data.competition, // Auto-correct zero volume

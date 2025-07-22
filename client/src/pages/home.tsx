@@ -426,7 +426,6 @@ export default function Home() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Keyword</TableHead>
-                      <TableHead>City</TableHead>
                       <TableHead>Search Volume</TableHead>
                       <TableHead>CPC</TableHead>
                       <TableHead>Competition</TableHead>
@@ -436,8 +435,7 @@ export default function Home() {
                   <TableBody>
                     {highVolumeKeywords.map((keyword, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{keyword.phrase}</TableCell>
-                        <TableCell className="text-gray-600">{keyword.city}</TableCell>
+                        <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
                           <Badge className="bg-blue-100 text-blue-800">
                             {keyword.searchVolume.toLocaleString()}/mo
@@ -498,7 +496,6 @@ export default function Home() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Keyword</TableHead>
-                      <TableHead>City</TableHead>
                       <TableHead>Search Volume</TableHead>
                       <TableHead>CPC</TableHead>
                       <TableHead>Competition</TableHead>
@@ -508,8 +505,7 @@ export default function Home() {
                   <TableBody>
                     {zeroVolumeKeywords.map((keyword, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{keyword.phrase}</TableCell>
-                        <TableCell className="text-gray-600">{keyword.city}</TableCell>
+                        <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
                           <Badge className="bg-gray-100 text-gray-800">
                             &lt;10/mo

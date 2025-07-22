@@ -68,8 +68,7 @@ export type KeywordResearch = typeof keywordResearches.$inferSelect;
 export type KeywordSearchRequest = z.infer<typeof keywordSearchRequestSchema>;
 
 export interface KeywordResult {
-  phrase: string;
-  city: string;
+  keyword: string; // Full keyword phrase including city
   searchVolume: number;
   cpc: number;
   competition: number;

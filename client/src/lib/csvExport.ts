@@ -8,8 +8,7 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
 
   // CSV headers
   const headers = [
-    "Keyword",
-    "City", 
+    "Keyword", 
     "Search Volume",
     "CPC ($)",
     "Competition (%)",
@@ -20,8 +19,7 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
   const csvRows = [
     headers.join(","),
     ...data.map(row => [
-      `"${row.phrase}"`,
-      `"${row.city}"`,
+      `"${row.keyword}"`,
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
@@ -66,7 +64,6 @@ export function exportAllResults(research: {
     "Cities",
     "Generated Date",
     "Keyword",
-    "City", 
     "Search Volume",
     "CPC ($)",
     "Competition (%)",
@@ -89,8 +86,7 @@ export function exportAllResults(research: {
       `"${research.industry}"`,
       `"${research.cities.join(", ")}"`,
       `"${new Date(research.createdAt).toLocaleDateString()}"`,
-      `"${row.phrase}"`,
-      `"${row.city}"`,
+      `"${row.keyword}"`,
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
