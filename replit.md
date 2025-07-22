@@ -18,14 +18,16 @@ Preferred communication style: Simple, everyday language.
 - **State Management**: TanStack Query (React Query) for server state management
 - **Routing**: Wouter for lightweight client-side routing
 - **Form Handling**: React Hook Form with Zod validation
+- **Admin Panel**: Dedicated admin page for managing industries, keywords, and API configuration
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **API Pattern**: RESTful API design
-- **Data Storage**: In-memory storage with planned PostgreSQL integration
+- **API Pattern**: RESTful API design with admin endpoints
+- **Data Storage**: In-memory storage with dynamic industry management
 - **ORM**: Drizzle ORM with PostgreSQL dialect
 - **Session Management**: Built-in Express session handling
+- **API Integration**: Keywords Everywhere API with fallback to mock data
 
 ### Key Components
 

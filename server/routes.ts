@@ -1,68 +1,50 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { keywordSearchRequestSchema, type KeywordResult } from "@shared/schema";
+import { keywordSearchRequestSchema, insertIndustrySchema, insertSettingsSchema, type KeywordResult, type Industry } from "@shared/schema";
 import { z } from "zod";
 
-// Pre-loaded keyword lists for each industry
-const INDUSTRY_KEYWORDS = {
-  "hvac": [
-    "HVAC repair",
-    "air conditioning repair",
-    "heating repair",
-    "HVAC installation",
-    "air conditioning installation",
-    "heating installation",
-    "HVAC service",
-    "air conditioning service",
-    "heating service",
-    "HVAC contractor",
-    "AC repair",
-    "furnace repair"
-  ],
-  "plumbing": [
-    "plumber near me",
-    "plumbing repair",
-    "drain cleaning",
-    "water heater repair",
-    "plumbing service",
-    "emergency plumber",
-    "toilet repair",
-    "pipe repair",
-    "leak repair",
-    "plumbing installation",
-    "sewer cleaning",
-    "faucet repair"
-  ],
-  "electrical": [
-    "electrician near me",
-    "electrical repair",
-    "electrical installation",
-    "electrical service",
-    "emergency electrician",
-    "circuit breaker repair",
-    "outlet installation",
-    "electrical wiring",
-    "panel upgrade",
-    "lighting installation",
-    "electrical inspection",
-    "electrical contractor"
-  ],
-  "digital-marketing": [
-    "digital marketing agency",
-    "SEO services",
-    "PPC management",
-    "social media marketing",
-    "web design",
-    "online marketing",
-    "search engine optimization",
-    "digital advertising",
-    "content marketing",
-    "email marketing",
-    "local SEO",
-    "website development"
-  ]
-};
+// Keywords Everywhere API integration
+async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Promise<Map<string, any>> {
+  const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
+  
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        country: "US",
+        currency: "USD",
+        dataSource: "gkp",
+        kw: keywords,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const results = new Map();
+    
+    // Transform API response to our format
+    data.data.forEach((item: any) => {
+      results.set(item.keyword, {
+        volume: item.vol || 0,
+        cpc: item.cpc || 0,
+        competition: item.vol === 0 ? 0 : (item.competition || 0), // Auto-correct zero volume
+      });
+    });
+
+    return results;
+  } catch (error) {
+    console.error("Keywords Everywhere API error:", error);
+    throw error;
+  }
+}
 
 // Mock Keywords Everywhere API call
 async function fetchKeywordData(keywords: string[]): Promise<Map<string, any>> {
@@ -113,18 +95,109 @@ async function fetchKeywordData(keywords: string[]): Promise<Map<string, any>> {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get industry keywords
+  // Admin/Settings routes
+  
+  // Get all industries
+  app.get("/api/admin/industries", async (req, res) => {
+    try {
+      const industries = await storage.getIndustries();
+      res.json(industries);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create new industry
+  app.post("/api/admin/industries", async (req, res) => {
+    try {
+      const validatedData = insertIndustrySchema.parse(req.body);
+      const industry = await storage.createIndustry(validatedData);
+      res.json(industry);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update industry
+  app.put("/api/admin/industries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertIndustrySchema.partial().parse(req.body);
+      const industry = await storage.updateIndustry(id, validatedData);
+      
+      if (!industry) {
+        return res.status(404).json({ message: "Industry not found" });
+      }
+      
+      res.json(industry);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Delete industry
+  app.delete("/api/admin/industries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteIndustry(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Industry not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get settings
+  app.get("/api/admin/settings", async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings || { keywordsEverywhereApiKey: null });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update settings
+  app.put("/api/admin/settings", async (req, res) => {
+    try {
+      const validatedData = insertSettingsSchema.parse(req.body);
+      const settings = await storage.updateSettings(validatedData);
+      
+      // Reset the KWE client when API key changes
+      kweClient = null;
+      
+      res.json(settings);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Get industry keywords (backwards compatible)
   app.get("/api/industries/:industry/keywords", async (req, res) => {
     try {
-      const industry = req.params.industry as keyof typeof INDUSTRY_KEYWORDS;
+      const industryName = req.params.industry;
+      const industry = await storage.getIndustryByName(industryName);
       
-      if (!INDUSTRY_KEYWORDS[industry]) {
+      if (!industry) {
         return res.status(404).json({ message: "Industry not found" });
       }
       
       res.json({
-        industry,
-        keywords: INDUSTRY_KEYWORDS[industry]
+        industry: industry.name,
+        keywords: industry.keywords
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -137,22 +210,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = keywordSearchRequestSchema.parse(req.body);
       const { industry, cities } = validatedData;
       
-      // Get base keywords for the industry
-      const baseKeywords = INDUSTRY_KEYWORDS[industry];
-      if (!baseKeywords) {
-        return res.status(400).json({ message: "Invalid industry" });
+      // Get base keywords for the industry from database
+      const industryData = await storage.getIndustryByName(industry);
+      if (!industryData) {
+        return res.status(400).json({ message: "Industry not found" });
       }
       
       // Generate all keyword combinations
       const keywordCombinations: string[] = [];
-      baseKeywords.forEach(keyword => {
+      industryData.keywords.forEach(keyword => {
         cities.forEach(city => {
           keywordCombinations.push(`${keyword} ${city}`);
         });
       });
       
-      // Fetch keyword data from API
-      const keywordData = await fetchKeywordData(keywordCombinations);
+      // Check if we have API key for real data
+      const settings = await storage.getSettings();
+      let keywordData: Map<string, any>;
+      
+      if (settings?.keywordsEverywhereApiKey) {
+        try {
+          // Use real Keywords Everywhere API
+          keywordData = await fetchKeywordDataFromAPI(keywordCombinations, settings.keywordsEverywhereApiKey);
+        } catch (error) {
+          console.error("API failed, falling back to mock data:", error);
+          keywordData = await fetchKeywordData(keywordCombinations);
+        }
+      } else {
+        // Use mock data if no API key
+        keywordData = await fetchKeywordData(keywordCombinations);
+      }
       
       // Process results
       const results: KeywordResult[] = [];

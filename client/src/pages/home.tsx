@@ -13,15 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV } from "@/lib/csvExport";
-import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target } from "lucide-react";
-import type { KeywordResearch, KeywordResult } from "@shared/schema";
+import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings } from "lucide-react";
+import { Link } from "wouter";
+import type { KeywordResearch, KeywordResult, Industry } from "@shared/schema";
 
-const INDUSTRIES = [
-  { value: "hvac", label: "HVAC", description: "Heating & Cooling" },
-  { value: "plumbing", label: "Plumbing", description: "Pipes & Fixtures" },
-  { value: "electrical", label: "Electrical", description: "Wiring & Repair" },
-  { value: "digital-marketing", label: "Digital Marketing", description: "SEO & PPC Services" },
-] as const;
+// Industries are now loaded dynamically from the database
 
 export default function Home() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>("");
@@ -32,6 +28,11 @@ export default function Home() {
   const [processingProgress, setProcessingProgress] = useState(0);
   const [currentKeyword, setCurrentKeyword] = useState("");
   const { toast } = useToast();
+
+  // Get all industries
+  const { data: industries } = useQuery({
+    queryKey: ["/api/admin/industries"],
+  });
 
   // Get industry keywords
   const { data: industryData } = useQuery({
@@ -175,6 +176,12 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/admin">
+                <Button variant="ghost" className="flex items-center space-x-2 text-neutral-dark hover:text-gray-900">
+                  <Settings size={16} />
+                  <span>Admin</span>
+                </Button>
+              </Link>
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2 text-neutral-dark hover:text-gray-900">
@@ -246,20 +253,19 @@ export default function Home() {
               onValueChange={setSelectedIndustry}
               className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"
             >
-              {INDUSTRIES.map((industry) => (
-                <div key={industry.value}>
+              {industries?.map((industry: Industry) => (
+                <div key={industry.name}>
                   <Label
-                    htmlFor={industry.value}
+                    htmlFor={industry.name}
                     className="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-blue-50"
                   >
                     <RadioGroupItem
-                      value={industry.value}
-                      id={industry.value}
+                      value={industry.name}
+                      id={industry.name}
                       className="mr-3"
                     />
                     <div>
                       <div className="font-medium text-gray-900">{industry.label}</div>
-                      <div className="text-sm text-neutral-dark">{industry.description}</div>
                     </div>
                   </Label>
                 </div>

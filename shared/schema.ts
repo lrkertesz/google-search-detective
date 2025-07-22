@@ -8,6 +8,21 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
+// Add new tables for admin functionality
+export const industries = pgTable("industries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  label: text("label").notNull(),
+  keywords: json("keywords").$type<string[]>().notNull(),
+});
+
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  keywordsEverywhereApiKey: text("keywords_everywhere_api_key"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const keywordResearches = pgTable("keyword_researches", {
   id: serial("id").primaryKey(),
   industry: text("industry").notNull(),
@@ -21,6 +36,16 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
+export const insertIndustrySchema = createInsertSchema(industries).pick({
+  name: true,
+  label: true,
+  keywords: true,
+});
+
+export const insertSettingsSchema = createInsertSchema(settings).pick({
+  keywordsEverywhereApiKey: true,
+});
+
 export const insertKeywordResearchSchema = createInsertSchema(keywordResearches).pick({
   industry: true,
   cities: true,
@@ -28,12 +53,16 @@ export const insertKeywordResearchSchema = createInsertSchema(keywordResearches)
 });
 
 export const keywordSearchRequestSchema = z.object({
-  industry: z.enum(["hvac", "plumbing", "electrical", "digital-marketing"]),
+  industry: z.string().min(1),
   cities: z.array(z.string().min(1)),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertIndustry = z.infer<typeof insertIndustrySchema>;
+export type Industry = typeof industries.$inferSelect;
+export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+export type Settings = typeof settings.$inferSelect;
 export type InsertKeywordResearch = z.infer<typeof insertKeywordResearchSchema>;
 export type KeywordResearch = typeof keywordResearches.$inferSelect;
 export type KeywordSearchRequest = z.infer<typeof keywordSearchRequestSchema>;
