@@ -71,9 +71,27 @@ export default function Home() {
   });
 
   const addCity = () => {
-    if (cityInput.trim() && !cities.includes(cityInput.trim())) {
-      setCities([...cities, cityInput.trim()]);
+    if (!cityInput.trim()) return;
+    
+    // Parse multiple cities separated by commas
+    const newCities = cityInput
+      .split(',')
+      .map(city => city.trim())
+      .filter(city => city.length > 0 && !cities.includes(city));
+    
+    if (newCities.length > 0) {
+      setCities([...cities, ...newCities]);
       setCityInput("");
+      toast({
+        title: "Cities Added",
+        description: `Added ${newCities.length} ${newCities.length === 1 ? 'city' : 'cities'}: ${newCities.join(', ')}`,
+      });
+    } else if (cityInput.trim() && cities.includes(cityInput.trim())) {
+      toast({
+        title: "Duplicate City",
+        description: "This city is already in your list",
+        variant: "destructive",
+      });
     }
   };
 
@@ -282,7 +300,7 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Input
-                  placeholder="Enter city names (e.g., Miami, Orlando, Tampa)"
+                  placeholder="Enter city names separated by commas (e.g., Miami, Orlando, Tampa, Jacksonville, Fort Lauderdale, Gainesville)"
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
                   onKeyPress={handleKeyPress}
