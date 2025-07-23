@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
 - **API Pattern**: RESTful API design with admin endpoints
-- **Data Storage**: In-memory storage with dynamic industry management
+- **Data Storage**: PostgreSQL database with persistent storage for all data
 - **ORM**: Drizzle ORM with PostgreSQL dialect
 - **Session Management**: Built-in Express session handling
 - **API Integration**: Keywords Everywhere API with fallback to mock data
