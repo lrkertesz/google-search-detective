@@ -33,6 +33,12 @@ export default function Admin() {
     queryKey: ["/api/admin/settings"],
   });
 
+  // Check current API key status
+  const { data: apiKeyStatus } = useQuery({
+    queryKey: ["/api/admin/test-current-api-key"],
+    refetchInterval: false,
+  });
+
   // Update settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: { keywordsEverywhereApiKey: string }) => {
@@ -304,13 +310,33 @@ export default function Admin() {
                   Save
                 </Button>
               </div>
-              {settings?.keywordsEverywhereApiKey && (
+              {/* API Key Status */}
+              {apiKeyStatus && (
+                <div className="mt-2">
+                  {apiKeyStatus.valid ? (
+                    <p className="text-sm text-green-600">
+                      ✓ API key is active ({apiKeyStatus.source === 'environment' ? 'from environment variables' : 'from database'})
+                      {apiKeyStatus.creditsRemaining && ` - ${apiKeyStatus.creditsRemaining} credits remaining`}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-red-600">
+                      ✗ {apiKeyStatus.message}
+                    </p>
+                  )}
+                </div>
+              )}
+              {!apiKeyStatus?.valid && settings?.keywordsEverywhereApiKey && (
                 <p className="text-sm text-green-600 mt-2">
-                  ✓ API key is configured
+                  ✓ API key is configured (database)
                 </p>
               )}
               <p className="text-xs text-neutral-dark mt-1">
                 Get your API key from <a href="https://keywordseverywhere.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">keywordseverywhere.com</a>
+                {apiKeyStatus?.source === 'environment' && (
+                  <span className="block mt-1 text-green-600">
+                    Note: Using API key from Replit environment variables (persistent across restarts)
+                  </span>
+                )}
               </p>
             </div>
           </CardContent>

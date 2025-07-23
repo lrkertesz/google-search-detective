@@ -281,6 +281,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Test current API key (environment or database)
+  app.get("/api/admin/test-current-api-key", async (req, res) => {
+    try {
+      const envApiKey = process.env.KEYWORDS_EVERYWHERE_API_KEY || process.env.KWE_API_KEY;
+      const settings = await storage.getSettings();
+      const dbApiKey = settings?.keywordsEverywhereApiKey;
+      
+      const finalApiKey = envApiKey || dbApiKey;
+      
+      if (!finalApiKey) {
+        return res.json({ 
+          valid: false, 
+          message: "No API key found in environment variables or database",
+          source: "none"
+        });
+      }
+
+      const result = await testApiKey(finalApiKey);
+      res.json({
+        ...result,
+        source: envApiKey ? "environment" : "database"
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        valid: false, 
+        message: `Test failed: ${error.message}`,
+        source: "unknown"
+      });
+    }
+  });
   
   // Get industry keywords (backwards compatible)
   app.get("/api/industries/:industry/keywords", async (req, res) => {
@@ -321,22 +352,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
       
-      // Check if we have API key for real data
+      // Check if we have API key for real data (check both environment and database)
+      const apiKey = process.env.KEYWORDS_EVERYWHERE_API_KEY || 
+                    process.env.KWE_API_KEY;
+      
       const settings = await storage.getSettings();
+      const dbApiKey = settings?.keywordsEverywhereApiKey;
+      
+      const finalApiKey = apiKey || dbApiKey;
       let keywordData: Map<string, any>;
       
-      if (settings?.keywordsEverywhereApiKey) {
+      if (finalApiKey) {
         try {
           console.log("🔑 Using real Keywords Everywhere API for", keywordCombinations.length, "keywords");
           // Use real Keywords Everywhere API
-          keywordData = await fetchKeywordDataFromAPI(keywordCombinations, settings.keywordsEverywhereApiKey);
+          keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
           console.log("✅ Real API data retrieved successfully");
         } catch (error) {
           console.error("❌ API failed, falling back to mock data:", error);
           keywordData = await fetchKeywordData(keywordCombinations);
         }
       } else {
-        console.log("⚠️ No API key found, using mock data for", keywordCombinations.length, "keywords");
+        console.log("⚠️ No API key found in environment or database, using mock data for", keywordCombinations.length, "keywords");
         // Use mock data if no API key
         keywordData = await fetchKeywordData(keywordCombinations);
       }
