@@ -405,7 +405,7 @@ export default function Home() {
           <div className="mb-8">
             <Label className="text-lg font-medium text-gray-900 mb-4 flex items-center">
               <Factory className="text-primary mr-2" size={20} />
-              Step 1: Select Factory
+              Step 1: Select Industry
             </Label>
             <RadioGroup
               value={selectedIndustry}
