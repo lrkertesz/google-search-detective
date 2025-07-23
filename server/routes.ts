@@ -396,25 +396,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const hasVeryLowCPC = data.cpc <= 2.00; // Very affordable
           const hasExcellentCPC = data.cpc <= 1.50; // Excellent value
           
-          // Business-focused opportunity logic prioritizing cost-effectiveness
-          if (hasGoodVolume && hasExcellentCPC) {
-            // Good volume + excellent cost = HIGH (like 390 searches at $1.38)
+          // Business-focused opportunity logic accounting for Google's broad matching behavior
+          // Note: $0.00 CPC keywords may not perform as expected due to Google showing
+          // higher-bid "similar" keywords instead of exact matches
+          
+          const isZeroCPC = data.cpc === 0;
+          
+          if (hasGoodVolume && hasExcellentCPC && !isZeroCPC) {
+            // Good volume + excellent cost (but not zero) = HIGH
             opportunity = "High";
-          } else if (hasHighVolume && hasVeryLowCPC) {
-            // High volume + very low cost = HIGH
+          } else if (hasHighVolume && hasVeryLowCPC && !isZeroCPC) {
+            // High volume + very low cost (but not zero) = HIGH
             opportunity = "High";
-          } else if (hasGoodVolume && hasVeryLowCPC) {
-            // Good volume + very low cost = HIGH
+          } else if (hasGoodVolume && hasVeryLowCPC && !isZeroCPC) {
+            // Good volume + very low cost (but not zero) = HIGH
             opportunity = "High";
           } else if (hasGoodVolume && hasLowCPC) {
             // Good volume + reasonable cost = MEDIUM
             opportunity = "Medium";
-          } else if (hasVeryLowCPC && data.volume >= 10) {
-            // Very cheap clicks = MEDIUM even with lower volume
+          } else if (hasVeryLowCPC && data.volume >= 10 && !isZeroCPC) {
+            // Very cheap clicks = MEDIUM (but downgrade zero-cost keywords)
             opportunity = "Medium";
-          } else if (hasExcellentCPC && data.volume >= 10) {
-            // Excellent cost = MEDIUM even with modest volume
+          } else if (isZeroCPC && data.volume >= 50) {
+            // Zero CPC with decent volume = MEDIUM (potential but risky due to broad matching)
             opportunity = "Medium";
+          } else if (isZeroCPC && data.volume >= 10) {
+            // Zero CPC with low volume = LOW (Google likely shows competing ads)
+            opportunity = "Low";
           }
           
           results.push({

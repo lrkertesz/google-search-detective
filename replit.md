@@ -7,6 +7,7 @@ This is a full-stack web application built for keyword research in service indus
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+PPC Campaign Experience: User has discovered through testing that $0.00 CPC keywords often don't perform as expected in Google Ads due to Google's "similar keyword" matching showing higher-bid competing ads instead of exact matches.
 
 ## System Architecture
 
