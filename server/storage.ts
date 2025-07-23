@@ -117,6 +117,19 @@ export class MemStorage implements IStorage {
 
   // Settings methods
   async getSettings(): Promise<Settings | undefined> {
+    // Check environment variable first, then fall back to in-memory storage
+    const envApiKey = process.env.KEYWORDS_EVERYWHERE_API_KEY;
+    
+    if (envApiKey) {
+      // If environment variable exists, return settings with env API key
+      return {
+        id: 1,
+        keywordsEverywhereApiKey: envApiKey,
+        createdAt: this.settings?.createdAt || new Date(),
+        updatedAt: new Date()
+      };
+    }
+    
     return this.settings;
   }
 

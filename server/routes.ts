@@ -242,6 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/settings", async (req, res) => {
     try {
       const settings = await storage.getSettings();
+      // Always show current settings including environment variables
       res.json(settings || { keywordsEverywhereApiKey: null });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
