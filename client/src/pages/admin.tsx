@@ -15,8 +15,19 @@ import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOf
 import { Link } from "wouter";
 import type { Industry, Settings as SettingsType } from "@shared/schema";
 
+interface EditingIndustry extends Omit<Industry, 'keywords'> {
+  keywords: string;
+}
+
+interface ApiKeyStatus {
+  valid: boolean;
+  message: string;
+  source?: string;
+  creditsRemaining?: number;
+}
+
 export default function Admin() {
-  const [editingIndustry, setEditingIndustry] = useState<Industry | null>(null);
+  const [editingIndustry, setEditingIndustry] = useState<EditingIndustry | null>(null);
   const [newIndustry, setNewIndustry] = useState({ name: "", label: "", keywords: "" });
   const [isCreating, setIsCreating] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
@@ -24,17 +35,17 @@ export default function Admin() {
   const { toast } = useToast();
 
   // Fetch industries
-  const { data: industries, isLoading: industriesLoading } = useQuery({
+  const { data: industries, isLoading: industriesLoading } = useQuery<Industry[]>({
     queryKey: ["/api/admin/industries"],
   });
 
   // Fetch settings
-  const { data: settings, isLoading: settingsLoading } = useQuery({
+  const { data: settings, isLoading: settingsLoading } = useQuery<SettingsType>({
     queryKey: ["/api/admin/settings"],
   });
 
   // Check current API key status
-  const { data: apiKeyStatus } = useQuery({
+  const { data: apiKeyStatus } = useQuery<ApiKeyStatus>({
     queryKey: ["/api/admin/test-current-api-key"],
     refetchInterval: false,
   });
@@ -47,13 +58,14 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/test-current-api-key"] });
       toast({
         title: "Settings Updated",
         description: "API key has been saved successfully",
       });
       setApiKeyInput("");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Update Failed",
         description: error.message,
@@ -77,7 +89,7 @@ export default function Admin() {
         variant: data.valid ? "default" : "destructive",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Test Failed",
         description: error.message,
@@ -101,7 +113,7 @@ export default function Admin() {
         description: "New industry has been added successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Creation Failed",
         description: error.message,
@@ -125,7 +137,7 @@ export default function Admin() {
         description: "Industry has been updated successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Update Failed",
         description: error.message,
@@ -147,7 +159,7 @@ export default function Admin() {
         description: "Industry has been removed successfully",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Deletion Failed",
         description: error.message,
@@ -224,10 +236,8 @@ export default function Admin() {
   const openEditDialog = (industry: Industry) => {
     setEditingIndustry({
       ...industry,
-      keywords: Array.isArray(industry.keywords) 
-        ? industry.keywords.join('\n')
-        : industry.keywords
-    } as any);
+      keywords: industry.keywords.join('\n')
+    });
   };
 
   if (industriesLoading || settingsLoading) {
