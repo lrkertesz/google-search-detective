@@ -131,18 +131,18 @@ export default function Home() {
   );
 
   // Get all industries
-  const { data: industries } = useQuery({
+  const { data: industries } = useQuery<Industry[]>({
     queryKey: ["/api/admin/industries"],
   });
 
   // Get industry keywords
-  const { data: industryData } = useQuery({
+  const { data: industryData } = useQuery<Industry>({
     queryKey: ["/api/industries", selectedIndustry, "keywords"],
     enabled: !!selectedIndustry,
   });
 
   // Get research history
-  const { data: researchHistory } = useQuery({
+  const { data: researchHistory } = useQuery<KeywordResearch[]>({
     queryKey: ["/api/keyword-research"],
   });
 

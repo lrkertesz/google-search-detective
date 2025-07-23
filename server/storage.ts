@@ -88,7 +88,12 @@ export class MemStorage implements IStorage {
 
   async createIndustry(insertIndustry: InsertIndustry): Promise<Industry> {
     const id = this.currentIndustryId++;
-    const industry: Industry = { ...insertIndustry, id };
+    const industry: Industry = { 
+      id,
+      name: insertIndustry.name,
+      label: insertIndustry.label,
+      keywords: [...(insertIndustry.keywords || [])]
+    };
     this.industries.set(id, industry);
     return industry;
   }
@@ -97,7 +102,11 @@ export class MemStorage implements IStorage {
     const existing = this.industries.get(id);
     if (!existing) return undefined;
     
-    const updated: Industry = { ...existing, ...updateData };
+    const updated: Industry = { 
+      ...existing, 
+      ...updateData,
+      keywords: updateData.keywords ? [...updateData.keywords] : existing.keywords
+    };
     this.industries.set(id, updated);
     return updated;
   }
@@ -132,8 +141,10 @@ export class MemStorage implements IStorage {
   async createKeywordResearch(insertResearch: InsertKeywordResearch): Promise<KeywordResearch> {
     const id = this.currentResearchId++;
     const research: KeywordResearch = { 
-      ...insertResearch, 
       id,
+      industry: insertResearch.industry,
+      cities: [...(insertResearch.cities || [])],
+      results: [...(insertResearch.results || [])] as KeywordResult[],
       createdAt: new Date()
     };
     this.keywordResearches.set(id, research);
