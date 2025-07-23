@@ -8,6 +8,7 @@ import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import { ReportPreview } from "@/pages/report-preview";
 import { LandingPreview } from "@/pages/landing-preview";
+import { CompetitiveIntelligencePreview } from "@/pages/competitive-intelligence-preview";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/report-preview" component={ReportPreview} />
       <Route path="/landing-preview" component={LandingPreview} />
+      <Route path="/competitive-intelligence" component={CompetitiveIntelligencePreview} />
       <Route component={NotFound} />
     </Switch>
   );
