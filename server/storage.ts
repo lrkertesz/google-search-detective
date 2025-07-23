@@ -20,6 +20,7 @@ export interface IStorage {
   createKeywordResearch(research: InsertKeywordResearch): Promise<KeywordResearch>;
   getKeywordResearches(): Promise<KeywordResearch[]>;
   getKeywordResearch(id: number): Promise<KeywordResearch | undefined>;
+  deleteKeywordResearch(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -174,6 +175,10 @@ export class MemStorage implements IStorage {
   async getKeywordResearch(id: number): Promise<KeywordResearch | undefined> {
     return this.keywordResearches.get(id);
   }
+
+  async deleteKeywordResearch(id: number): Promise<boolean> {
+    return this.keywordResearches.delete(id);
+  }
 }
 
 // Database storage implementation
@@ -288,6 +293,11 @@ export class DatabaseStorage implements IStorage {
   async getKeywordResearch(id: number): Promise<KeywordResearch | undefined> {
     const [research] = await db.select().from(keywordResearches).where(eq(keywordResearches.id, id));
     return research || undefined;
+  }
+
+  async deleteKeywordResearch(id: number): Promise<boolean> {
+    const result = await db.delete(keywordResearches).where(eq(keywordResearches.id, id));
+    return (result.rowCount || 0) > 0;
   }
 }
 

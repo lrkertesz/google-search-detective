@@ -469,6 +469,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete specific research
+  app.delete("/api/keyword-research/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteKeywordResearch(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Research not found" });
+      }
+      
+      res.json({ success: true, message: "Research deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

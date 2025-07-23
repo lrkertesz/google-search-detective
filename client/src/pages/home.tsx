@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV } from "@/lib/csvExport";
-import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import type { KeywordResearch, KeywordResult, Industry } from "@shared/schema";
 
@@ -171,6 +171,28 @@ export default function Home() {
     },
   });
 
+  // Delete research mutation
+  const deleteResearchMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/keyword-research/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
+      toast({
+        title: "Research Deleted",
+        description: "Search history item removed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const addCity = () => {
     if (!cityInput.trim()) return;
     
@@ -316,28 +338,46 @@ export default function Home() {
                     {researchHistory?.map((research: KeywordResearch) => (
                       <Card 
                         key={research.id} 
-                        className="cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => loadResearch(research)}
+                        className="hover:bg-gray-50 transition-colors relative group"
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-gray-900 capitalize">
                               {research.industry.replace("-", " ")}
                             </span>
-                            <span className="text-xs text-neutral-dark">
-                              {new Date(research.createdAt).toLocaleDateString()}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-neutral-dark">
+                                {new Date(research.createdAt).toLocaleDateString()}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-600 transition-all"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteResearchMutation.mutate(research.id);
+                                }}
+                                disabled={deleteResearchMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="text-sm text-neutral-dark mb-2">
-                            {research.cities.join(", ")}
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-green-600">
-                              {research.results.filter(r => r.searchVolume > 10).length} keywords
-                            </span>
-                            <span className="text-amber-600">
-                              {research.results.filter(r => r.searchVolume <= 10).length} low-comp
-                            </span>
+                          <div 
+                            className="cursor-pointer"
+                            onClick={() => loadResearch(research)}
+                          >
+                            <div className="text-sm text-neutral-dark mb-2">
+                              {research.cities.join(", ")}
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-green-600">
+                                {research.results.filter(r => r.searchVolume > 10).length} keywords
+                              </span>
+                              <span className="text-amber-600">
+                                {research.results.filter(r => r.searchVolume <= 10).length} low-comp
+                              </span>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
