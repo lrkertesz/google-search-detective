@@ -385,9 +385,7 @@ export default function Home() {
                   </div>
                 </SheetContent>
               </Sheet>
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">JD</span>
-              </div>
+
             </div>
           </div>
         </div>
