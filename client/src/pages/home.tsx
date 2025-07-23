@@ -13,11 +13,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV } from "@/lib/csvExport";
-import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings } from "lucide-react";
+import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import type { KeywordResearch, KeywordResult, Industry } from "@shared/schema";
 
 // Industries are now loaded dynamically from the database
+
+type SortField = 'keyword' | 'searchVolume' | 'cpc' | 'competition' | 'opportunity';
+type SortDirection = 'asc' | 'desc';
 
 export default function Home() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>("");
@@ -27,7 +30,105 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [currentKeyword, setCurrentKeyword] = useState("");
+  const [sortField, setSortField] = useState<SortField>('searchVolume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [zeroVolumeSortField, setZeroVolumeSortField] = useState<SortField>('keyword');
+  const [zeroVolumeSortDirection, setZeroVolumeSortDirection] = useState<SortDirection>('asc');
   const { toast } = useToast();
+
+  // Sorting functions
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'keyword' || field === 'opportunity' ? 'asc' : 'desc');
+    }
+  };
+
+  const handleZeroVolumeSort = (field: SortField) => {
+    if (zeroVolumeSortField === field) {
+      setZeroVolumeSortDirection(zeroVolumeSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setZeroVolumeSortField(field);
+      setZeroVolumeSortDirection(field === 'keyword' || field === 'opportunity' ? 'asc' : 'desc');
+    }
+  };
+
+  const sortKeywords = (keywords: KeywordResult[], field: SortField, direction: SortDirection) => {
+    return [...keywords].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (field) {
+        case 'keyword':
+          aValue = a.keyword.toLowerCase();
+          bValue = b.keyword.toLowerCase();
+          break;
+        case 'searchVolume':
+          aValue = a.searchVolume;
+          bValue = b.searchVolume;
+          break;
+        case 'cpc':
+          aValue = a.cpc;
+          bValue = b.cpc;
+          break;
+        case 'competition':
+          aValue = a.competition;
+          bValue = b.competition;
+          break;
+        case 'opportunity':
+          aValue = a.opportunity.toLowerCase();
+          bValue = b.opportunity.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+  };
+
+  // Sortable table head component
+  const SortableTableHead = ({ 
+    field, 
+    children, 
+    currentField, 
+    currentDirection, 
+    onSort 
+  }: {
+    field: SortField;
+    children: React.ReactNode;
+    currentField: SortField;
+    currentDirection: SortDirection;
+    onSort: (field: SortField) => void;
+  }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none"
+      onClick={() => onSort(field)}
+    >
+      <div className="flex items-center justify-between">
+        {children}
+        <div className="ml-2">
+          {currentField === field ? (
+            currentDirection === 'asc' ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )
+          ) : (
+            <div className="h-4 w-4 opacity-30">
+              <ChevronDown className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      </div>
+    </TableHead>
+  );
 
   // Get all industries
   const { data: industries } = useQuery({
@@ -406,10 +507,10 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="flex space-x-3">
-                    <Button variant="outline">
+                    <div className="text-sm text-gray-600 flex items-center">
                       <ArrowDownWideNarrow size={16} className="mr-2" />
-                      ArrowDownWideNarrow
-                    </Button>
+                      Click column headers to sort
+                    </div>
                     <Button 
                       onClick={exportHighVolumeCSV}
                       className="bg-green-600 hover:bg-green-700"
@@ -425,15 +526,50 @@ export default function Home() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Keyword</TableHead>
-                      <TableHead>Search Volume</TableHead>
-                      <TableHead>CPC</TableHead>
-                      <TableHead>Competition</TableHead>
-                      <TableHead>Opportunity</TableHead>
+                      <SortableTableHead 
+                        field="keyword" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        Keyword
+                      </SortableTableHead>
+                      <SortableTableHead 
+                        field="searchVolume" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        Search Volume
+                      </SortableTableHead>
+                      <SortableTableHead 
+                        field="cpc" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        CPC
+                      </SortableTableHead>
+                      <SortableTableHead 
+                        field="competition" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        Competition
+                      </SortableTableHead>
+                      <SortableTableHead 
+                        field="opportunity" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        Opportunity
+                      </SortableTableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {highVolumeKeywords.map((keyword, index) => (
+                    {sortKeywords(highVolumeKeywords, sortField, sortDirection).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
@@ -476,10 +612,10 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="flex space-x-3">
-                    <Button variant="outline">
+                    <div className="text-sm text-gray-600 flex items-center">
                       <ArrowDownWideNarrow size={16} className="mr-2" />
-                      ArrowDownWideNarrow
-                    </Button>
+                      Click column headers to sort
+                    </div>
                     <Button 
                       onClick={exportZeroVolumeCSV}
                       className="bg-amber-600 hover:bg-amber-700"
@@ -495,15 +631,36 @@ export default function Home() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Keyword</TableHead>
+                      <SortableTableHead 
+                        field="keyword" 
+                        currentField={zeroVolumeSortField} 
+                        currentDirection={zeroVolumeSortDirection} 
+                        onSort={handleZeroVolumeSort}
+                      >
+                        Keyword
+                      </SortableTableHead>
                       <TableHead>Search Volume</TableHead>
-                      <TableHead>CPC</TableHead>
+                      <SortableTableHead 
+                        field="cpc" 
+                        currentField={zeroVolumeSortField} 
+                        currentDirection={zeroVolumeSortDirection} 
+                        onSort={handleZeroVolumeSort}
+                      >
+                        CPC
+                      </SortableTableHead>
                       <TableHead>Competition</TableHead>
-                      <TableHead>Strategy</TableHead>
+                      <SortableTableHead 
+                        field="opportunity" 
+                        currentField={zeroVolumeSortField} 
+                        currentDirection={zeroVolumeSortDirection} 
+                        onSort={handleZeroVolumeSort}
+                      >
+                        Strategy
+                      </SortableTableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {zeroVolumeKeywords.map((keyword, index) => (
+                    {sortKeywords(zeroVolumeKeywords, zeroVolumeSortField, zeroVolumeSortDirection).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
