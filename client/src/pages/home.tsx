@@ -536,14 +536,74 @@ export default function Home() {
         {/* Results Section */}
         {currentResearch && (
           <div className="space-y-8">
+            {/* Market Summary - Business Value Overview */}
+            <Card className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                  <Target className="mr-2 text-blue-600" size={20} />
+                  Market Opportunity Summary
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {currentResearch.results.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-600">Monthly Customer Searches</div>
+                    <div className="text-xs text-gray-500 mt-1">Active demand in your market</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {currentResearch.results.filter(k => k.opportunity === "High").length}
+                    </div>
+                    <div className="text-sm text-gray-600">Prime Opportunities</div>
+                    <div className="text-xs text-gray-500 mt-1">Ready for immediate action</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      ${Math.round(currentResearch.results.filter(k => k.searchVolume > 10).reduce((sum, k) => sum + (k.searchVolume * k.cpc * 0.15), 0)).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-600">Monthly Ad Investment</div>
+                    <div className="text-xs text-gray-500 mt-1">15% market share capture</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {currentResearch.results.filter(k => k.searchVolume <= 10 && k.cpc === 0).length}
+                    </div>
+                    <div className="text-sm text-gray-600">SEO Content Targets</div>
+                    <div className="text-xs text-gray-500 mt-1">Low-competition ranking opportunities</div>
+                  </div>
+                </div>
+                
+                {/* Business Intelligence Insights */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200">
+                  <h4 className="font-semibold text-indigo-800 mb-2">🎯 Strategic Recommendations</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <strong className="text-indigo-700">Immediate PPC Opportunities:</strong>
+                      <p className="text-gray-700">
+                        {currentResearch.results.filter(k => k.opportunity === "High" && k.searchVolume > 50).length} keywords with high search volume and manageable competition for quick market entry.
+                      </p>
+                    </div>
+                    <div>
+                      <strong className="text-indigo-700">Long-term SEO Strategy:</strong>
+                      <p className="text-gray-700">
+                        {currentResearch.results.filter(k => k.cpc === 0 && k.searchVolume <= 50).length} untapped keywords perfect for content marketing to establish market authority.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             {/* Keywords with Search Volume */}
             <Card>
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Keywords with Search Volume (&gt;10/month)</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">High-Traffic Opportunities</h3>
                     <p className="text-neutral-dark">
-                      <span className="font-medium text-green-600">{highVolumeKeywords.length}</span> keywords found with measurable search traffic
+                      <span className="font-medium text-green-600">{highVolumeKeywords.length}</span> keywords with active customer searches - 
+                      <span className="font-medium text-blue-600">{highVolumeKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
                     </p>
                   </div>
                   <div className="flex space-x-3">
@@ -604,7 +664,7 @@ export default function Home() {
                         currentDirection={sortDirection} 
                         onSort={handleSort}
                       >
-                        Opportunity
+                        Business Value
                       </SortableTableHead>
                     </TableRow>
                   </TableHeader>
@@ -631,7 +691,7 @@ export default function Home() {
                         </TableCell>
                         <TableCell>
                           <Badge className={getOpportunityColor(keyword.opportunity)}>
-                            {keyword.opportunity}
+                            {keyword.opportunity === "High" ? "💰 High Value" : keyword.opportunity === "Medium" ? "⚡ Good Value" : "📈 Long-term"}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -646,9 +706,10 @@ export default function Home() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Low Competition Keywords (0 search volume)</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Untapped Market Opportunities</h3>
                     <p className="text-neutral-dark">
-                      <span className="font-medium text-amber-600">{zeroVolumeKeywords.length}</span> potentially valuable low-cost keywords
+                      <span className="font-medium text-amber-600">{zeroVolumeKeywords.length}</span> keywords with low/zero competition - 
+                      <span className="font-medium text-purple-600">Perfect for content marketing & SEO</span>
                     </p>
                   </div>
                   <div className="flex space-x-3">
@@ -716,7 +777,7 @@ export default function Home() {
                         </TableCell>
                         <TableCell>
                           <Badge className="bg-blue-100 text-blue-800">
-                            Long-tail
+                            📝 Content Target
                           </Badge>
                         </TableCell>
                       </TableRow>
