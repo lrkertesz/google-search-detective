@@ -30,13 +30,36 @@ async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Prom
     const data = await response.json();
     const results = new Map();
     
+    console.log("📊 Raw API response sample:", JSON.stringify(data.data?.slice(0, 3), null, 2));
+    
     // Transform API response to our format
     data.data.forEach((item: any) => {
+      const volume = item.vol || item.volume || 0;
+      
+      // Handle CPC - it might be a number or an object with currency/value
+      let cpc = 0;
+      if (typeof item.cpc === 'number') {
+        cpc = item.cpc;
+      } else if (item.cpc && typeof item.cpc === 'object' && item.cpc.value !== undefined) {
+        cpc = parseFloat(item.cpc.value) || 0;
+      }
+      
+      // Handle competition - convert from 0-1 scale to percentage if needed
+      let competition = volume === 0 ? 0 : (item.competition || 0);
+      if (competition > 0 && competition <= 1) {
+        competition = Math.round(competition * 100); // Convert to percentage
+      }
+      
       results.set(item.keyword, {
-        volume: item.vol || 0,
-        cpc: item.cpc || 0,
-        competition: item.vol === 0 ? 0 : (item.competition || 0), // Auto-correct zero volume
+        volume: volume,
+        cpc: cpc,
+        competition: competition,
       });
+      
+      // Log first few entries for debugging
+      if (results.size <= 3) {
+        console.log(`🔍 Keyword: "${item.keyword}" -> Volume: ${volume}, CPC: ${cpc}, Competition: ${competition}%`);
+      }
     });
 
     return results;
@@ -120,19 +143,19 @@ async function fetchKeywordData(keywords: string[]): Promise<Map<string, any>> {
     let cpc = 0;
     let competition = 0;
     
-    if (Math.random() > 0.3) { // 70% chance of having volume
+    if (Math.random() > 0.4) { // 60% chance of having volume (more realistic)
       if (isLongTail) {
-        volume = Math.floor(Math.random() * 100) + 10; // 10-110
-        cpc = Math.random() * 5 + 1; // $1-6
-        competition = Math.random() * 40 + 10; // 10-50%
+        volume = Math.floor(Math.random() * 30) + 10; // 10-40 (more realistic for long-tail)
+        cpc = Math.random() * 3 + 1; // $1-4
+        competition = Math.random() * 30 + 10; // 10-40%
       } else if (hasLocation) {
-        volume = Math.floor(Math.random() * 500) + 50; // 50-550
-        cpc = Math.random() * 10 + 3; // $3-13
-        competition = Math.random() * 30 + 40; // 40-70%
+        volume = Math.floor(Math.random() * 100) + 20; // 20-120 (local searches)
+        cpc = Math.random() * 8 + 2; // $2-10
+        competition = Math.random() * 40 + 30; // 30-70%
       } else {
-        volume = Math.floor(Math.random() * 2000) + 100; // 100-2100
-        cpc = Math.random() * 15 + 5; // $5-20
-        competition = Math.random() * 40 + 50; // 50-90%
+        volume = Math.floor(Math.random() * 150) + 30; // 30-180 (much more realistic)
+        cpc = Math.random() * 12 + 3; // $3-15
+        competition = Math.random() * 50 + 40; // 40-90%
       }
     } else {
       // Zero volume keywords still have CPC data
@@ -304,13 +327,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (settings?.keywordsEverywhereApiKey) {
         try {
+          console.log("🔑 Using real Keywords Everywhere API for", keywordCombinations.length, "keywords");
           // Use real Keywords Everywhere API
           keywordData = await fetchKeywordDataFromAPI(keywordCombinations, settings.keywordsEverywhereApiKey);
+          console.log("✅ Real API data retrieved successfully");
         } catch (error) {
-          console.error("API failed, falling back to mock data:", error);
+          console.error("❌ API failed, falling back to mock data:", error);
           keywordData = await fetchKeywordData(keywordCombinations);
         }
       } else {
+        console.log("⚠️ No API key found, using mock data for", keywordCombinations.length, "keywords");
         // Use mock data if no API key
         keywordData = await fetchKeywordData(keywordCombinations);
       }
