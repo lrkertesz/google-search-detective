@@ -2,12 +2,22 @@
 
 ## Overview
 
-This is a full-stack web application built for keyword research in service industries like HVAC, plumbing, electrical, and digital marketing. The application generates keyword research reports with metrics like search volume, CPC, competition scores, and business-focused opportunity rankings for specified cities and industries. The opportunity scoring prioritizes cost-effectiveness (low CPC) combined with viable search volume for practical PPC campaign planning.
+This is a full-stack keyword research application that serves as one component of a comprehensive business intelligence suite for service industries. The application generates geo-targeted keyword research reports with real-time metrics including search volume, CPC, competition scores, and business-focused opportunity rankings for HVAC, plumbing, electrical, and digital marketing industries.
+
+The opportunity scoring prioritizes cost-effectiveness (non-zero CPC values) combined with viable search volume for practical PPC campaign planning, accounting for Google's broad matching behavior that can override low-cost keywords with higher-bid alternatives.
+
+**Business Intelligence Suite Context:**
+This keyword research tool is designed to work alongside:
+1. Market revenue estimator by industry for specific cities
+2. Competition analyzer showing business rankings for geo-targeted keyword phrases in Maps 3-Pack and Organic SEO
+
+Together, these tools provide complete market entry analysis for service businesses.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 PPC Campaign Experience: User has discovered through testing that $0.00 CPC keywords often don't perform as expected in Google Ads due to Google's "similar keyword" matching showing higher-bid competing ads instead of exact matches.
+Business Context: User is building a comprehensive business intelligence suite with three interconnected tools for market analysis in service industries.
 
 ## System Architecture
 
