@@ -19,6 +19,15 @@ Preferred communication style: Simple, everyday language.
 PPC Campaign Experience: User has discovered through testing that $0.00 CPC keywords often don't perform as expected in Google Ads due to Google's "similar keyword" matching showing higher-bid competing ads instead of exact matches.
 Business Context: User is building a comprehensive business intelligence suite with three interconnected tools for market analysis in service industries.
 
+### Business Model & Strategy
+- User is the sole operator using these tools to create market research reports for service business owners
+- Report creation workflow: SnagIt screen captures → Word documents → PDF exports (due to better formatting than direct PDF generation)
+- Two-website strategy:
+  - NextWave-Research.com: Research-focused, less sales-oriented positioning
+  - NextWaveDigitalMarketing.com: Agency site (more sales-focused)
+- Monetization approach: Tiered offerings from free teasers to premium reports ($49-499 range)
+- Value proposition: Providing Fortune 500-level market intelligence tools to small service businesses
+
 ## System Architecture
 
 ### Frontend Architecture
