@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application built for keyword research in service industries like HVAC, plumbing, electrical, and digital marketing. The application generates keyword research reports with metrics like search volume, CPC, competition scores, and opportunity rankings for specified cities and industries.
+This is a full-stack web application built for keyword research in service industries like HVAC, plumbing, electrical, and digital marketing. The application generates keyword research reports with metrics like search volume, CPC, competition scores, and business-focused opportunity rankings for specified cities and industries. The opportunity scoring prioritizes cost-effectiveness (low CPC) combined with viable search volume for practical PPC campaign planning.
 
 ## User Preferences
 

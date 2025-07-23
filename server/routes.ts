@@ -384,11 +384,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       keywordCombinations.forEach(combination => {
         const data = keywordData.get(combination);
         if (data) {
-          // Determine opportunity level
+          // Determine opportunity level based on business value
+          // High opportunity: Good volume + Low CPC (affordable to bid on)
+          // Medium opportunity: Decent volume OR low CPC but not both
+          // Low opportunity: Low volume AND high CPC
           let opportunity: "High" | "Medium" | "Low" = "Low";
-          if (data.volume > 500 && data.competition < 60) {
+          
+          const hasGoodVolume = data.volume >= 50; // Minimum viable search volume
+          const hasHighVolume = data.volume >= 200; // Strong search volume
+          const hasLowCPC = data.cpc <= 5.00; // Affordable cost per click
+          const hasVeryLowCPC = data.cpc <= 2.00; // Very affordable
+          const hasExcellentCPC = data.cpc <= 1.50; // Excellent value
+          
+          // Business-focused opportunity logic prioritizing cost-effectiveness
+          if (hasGoodVolume && hasExcellentCPC) {
+            // Good volume + excellent cost = HIGH (like 390 searches at $1.38)
             opportunity = "High";
-          } else if (data.volume > 100 && data.competition < 75) {
+          } else if (hasHighVolume && hasVeryLowCPC) {
+            // High volume + very low cost = HIGH
+            opportunity = "High";
+          } else if (hasGoodVolume && hasVeryLowCPC) {
+            // Good volume + very low cost = HIGH
+            opportunity = "High";
+          } else if (hasGoodVolume && hasLowCPC) {
+            // Good volume + reasonable cost = MEDIUM
+            opportunity = "Medium";
+          } else if (hasVeryLowCPC && data.volume >= 10) {
+            // Very cheap clicks = MEDIUM even with lower volume
+            opportunity = "Medium";
+          } else if (hasExcellentCPC && data.volume >= 10) {
+            // Excellent cost = MEDIUM even with modest volume
             opportunity = "Medium";
           }
           
