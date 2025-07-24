@@ -598,7 +598,7 @@ export default function Home() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">High-Traffic Opportunities</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Keyword Search Volumes & PPC Costs</h3>
                     <p className="text-neutral-dark">
                       <span className="font-medium text-green-600">{highVolumeKeywords.length}</span> keywords with active customer searches - 
                       <span className="font-medium text-blue-600">{highVolumeKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
