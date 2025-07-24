@@ -670,11 +670,7 @@ export default function Home() {
                     {sortKeywords(highVolumeKeywords, sortField, sortDirection).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                        <TableCell>
-                          <Badge className="bg-slate-800 text-white font-semibold">
-                            {keyword.searchVolume.toLocaleString()}/mo
-                          </Badge>
-                        </TableCell>
+                        <TableCell className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
                         <TableCell className="font-medium">{keyword.competition}%</TableCell>
                         <TableCell>
