@@ -676,17 +676,7 @@ export default function Home() {
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="w-12 bg-gray-200 rounded-full h-2 mr-2">
-                              <div 
-                                className={`h-2 rounded-full ${getCompetitionColor(keyword.competition)}`}
-                                style={{ width: `${keyword.competition}%` }}
-                              />
-                            </div>
-                            <span className="text-sm text-gray-600">{keyword.competition}%</span>
-                          </div>
-                        </TableCell>
+                        <TableCell className="font-medium">{keyword.competition}%</TableCell>
                         <TableCell>
                           <Badge className={getOpportunityColor(keyword.opportunity)}>
                             {keyword.opportunity === "High" ? "💰 High Value" : keyword.opportunity === "Medium" ? "⚡ Good Value" : "📈 Long-term"}
