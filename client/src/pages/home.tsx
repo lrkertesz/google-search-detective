@@ -671,7 +671,7 @@ export default function Home() {
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
-                          <Badge className="bg-blue-100 text-blue-800">
+                          <Badge className="bg-slate-800 text-white font-semibold">
                             {keyword.searchVolume.toLocaleString()}/mo
                           </Badge>
                         </TableCell>
@@ -763,7 +763,7 @@ export default function Home() {
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
-                          <Badge className="bg-gray-100 text-gray-800">
+                          <Badge className="bg-amber-600 text-white font-semibold">
                             &lt;10/mo
                           </Badge>
                         </TableCell>
