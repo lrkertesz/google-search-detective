@@ -15,6 +15,10 @@ Together, these tools provide complete market entry analysis for service busines
 
 ## User Preferences
 
+**CRITICAL REQUIREMENTS:**
+- **ABSOLUTELY NO MOCK DATA**: System must never use mock, placeholder, seed, or fallback data under any circumstances. All data must come from authentic API sources only.
+- **DATA INTEGRITY**: Every piece of information displayed must be from real external APIs. No simulated or generated data.
+
 Preferred communication style: Simple, everyday language.
 PPC Campaign Experience: User has discovered through testing that $0.00 CPC keywords often don't perform as expected in Google Ads due to Google's "similar keyword" matching showing higher-bid competing ads instead of exact matches.
 Business Context: User is building a comprehensive business intelligence suite with three interconnected tools for market analysis in service industries.
