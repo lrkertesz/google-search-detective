@@ -25,21 +25,22 @@ Our comprehensive market analysis reveals a critical distinction between the **T
 
 ## The $100 Million Google Gap Explained
 
-The $100.4 million difference between methodologies reveals three distinct market segments:
+The $100.4 million difference between methodologies reveals the distinction between **services needed** and **services actively searched for online**:
 
 ### Segment 1: Active Search Market ($43.4M)
-**Customer Behavior**: Immediate-need customers experiencing equipment failures
+**Customer Behavior**: Customers experiencing urgent problems who turn to Google
 - High search volume keywords: "AC repair," "HVAC not working"
-- Emergency situations driving immediate Google searches
+- Emergency situations driving immediate online searches
 - Premium pricing tolerance due to urgency
 - High conversion rates from digital marketing
 
-### Segment 2: Relationship-Driven Market ($100.4M)
-**Customer Behavior**: Services acquired through existing relationships
-- Routine maintenance scheduled with current providers
-- Referral-based service acquisition
-- Repeat customer relationships
-- Lower digital marketing visibility
+### Segment 2: Non-Search Service Market ($100.4M)
+**Customer Behavior**: Services needed but acquired without Google searches
+- Word-of-mouth referrals from neighbors/friends
+- Yellow Pages, door hangers, radio/TV advertising responses
+- Scheduled maintenance reminders (non-contract customers)
+- Repeat customers calling known providers directly
+- Services needed but customers unaware (preventive maintenance gaps)
 
 ### Segment 3: Latent Market Opportunity
 **Customer Behavior**: Services needed but not actively sought
