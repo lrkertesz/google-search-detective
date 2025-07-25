@@ -662,7 +662,7 @@ export default function Home() {
                         currentDirection={sortDirection} 
                         onSort={handleSort}
                       >
-                        PPC Budget Cost
+                        PPC Budget Cost *
                       </SortableTableHead>
                     </TableRow>
                   </TableHeader>
@@ -680,6 +680,11 @@ export default function Home() {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+              <div className="px-6 pb-4">
+                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  <span className="font-medium">* PPC Budget Cost Calculation:</span> Search Volume × CPC × 15% market share capture = Monthly advertising budget needed to compete for this keyword
+                </div>
               </div>
             </Card>
 
