@@ -12,7 +12,7 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
     "Search Volume",
     "CPC ($)",
     "Competition (%)",
-    "Opportunity Level"
+    "PPC Budget Cost ($/mo)"
   ];
 
   // Convert data to CSV rows
@@ -23,7 +23,7 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
-      `"${row.opportunity}"`
+      Math.round(row.searchVolume * row.cpc * 0.15)
     ].join(","))
   ];
 
@@ -67,7 +67,7 @@ export function exportAllResults(research: {
     "Search Volume",
     "CPC ($)",
     "Competition (%)",
-    "Opportunity Level"
+    "PPC Budget Cost ($/mo)"
   ];
 
   const csvRows = [
@@ -77,7 +77,7 @@ export function exportAllResults(research: {
       `"${research.industry}"`,
       `"${research.cities.join(", ")}"`,
       `"${new Date(research.createdAt).toLocaleDateString()}"`,
-      "","","","","",""
+      "","","","",""
     ].join(","),
     // Add empty row for separation
     "",
@@ -90,7 +90,7 @@ export function exportAllResults(research: {
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
-      `"${row.opportunity}"`
+      Math.round(row.searchVolume * row.cpc * 0.15)
     ].join(","))
   ];
 

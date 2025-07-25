@@ -662,7 +662,7 @@ export default function Home() {
                         currentDirection={sortDirection} 
                         onSort={handleSort}
                       >
-                        Business Value
+                        PPC Budget Cost
                       </SortableTableHead>
                     </TableRow>
                   </TableHeader>
@@ -673,10 +673,8 @@ export default function Home() {
                         <TableCell className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
                         <TableCell className="font-medium">{keyword.competition}%</TableCell>
-                        <TableCell>
-                          <Badge className={getOpportunityColor(keyword.opportunity)}>
-                            {keyword.opportunity === "High" ? "💰 High Value" : keyword.opportunity === "Medium" ? "⚡ Good Value" : "📈 Long-term"}
-                          </Badge>
+                        <TableCell className="font-medium">
+                          ${Math.round(keyword.searchVolume * keyword.cpc * 0.15).toLocaleString()}/mo
                         </TableCell>
                       </TableRow>
                     ))}
