@@ -23,7 +23,7 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
-      Math.round(row.searchVolume * row.cpc * 0.15)
+      Math.round(row.searchVolume * row.cpc * 0.30)
     ].join(","))
   ];
 
@@ -90,7 +90,7 @@ export function exportAllResults(research: {
       row.searchVolume,
       row.cpc.toFixed(2),
       row.competition,
-      Math.round(row.searchVolume * row.cpc * 0.15)
+      Math.round(row.searchVolume * row.cpc * 0.30)
     ].join(","))
   ];
 

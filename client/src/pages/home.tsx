@@ -558,10 +558,10 @@ export default function Home() {
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
                     <div className="text-2xl font-bold text-orange-600">
-                      ${Math.round(currentResearch.results.filter(k => k.searchVolume > 10).reduce((sum, k) => sum + (k.searchVolume * k.cpc * 0.15), 0)).toLocaleString()}
+                      ${Math.round(currentResearch.results.filter(k => k.searchVolume > 10).reduce((sum, k) => sum + (k.searchVolume * k.cpc * 0.30), 0)).toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-600">Monthly Ad Investment</div>
-                    <div className="text-xs text-gray-500 mt-1">15% market share capture</div>
+                    <div className="text-xs text-gray-500 mt-1">30% click-through rate (position #1)</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600">
@@ -599,10 +599,13 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Keyword Search Volumes & PPC Costs</h3>
-                    <p className="text-neutral-dark">
+                    <p className="text-neutral-dark mb-3">
                       <span className="font-medium text-green-600">{highVolumeKeywords.length}</span> keywords with active customer searches - 
                       <span className="font-medium text-blue-600">{highVolumeKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
                     </p>
+                    <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <span className="font-medium">* PPC Budget Cost Calculation:</span> Search Volume × CPC × 30% click-through rate for #1 position = Monthly advertising budget needed to compete for this keyword
+                    </div>
                   </div>
                   <div className="flex space-x-3">
                     <div className="text-sm text-gray-600 flex items-center">
@@ -674,18 +677,14 @@ export default function Home() {
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
                         <TableCell className="font-medium">{keyword.competition}%</TableCell>
                         <TableCell className="font-medium">
-                          ${Math.round(keyword.searchVolume * keyword.cpc * 0.15).toLocaleString()}/mo
+                          ${Math.round(keyword.searchVolume * keyword.cpc * 0.30).toLocaleString()}/mo
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
-              <div className="px-6 pb-4">
-                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                  <span className="font-medium">* PPC Budget Cost Calculation:</span> Search Volume × CPC × 15% market share capture = Monthly advertising budget needed to compete for this keyword
-                </div>
-              </div>
+
             </Card>
 
             {/* Keywords with Zero Search Volume */}

@@ -12,7 +12,7 @@ export function BusinessValueSummary({ results, cities, industry }: BusinessValu
   const totalSearches = results.reduce((sum, k) => sum + k.searchVolume, 0);
   const highValueKeywords = results.filter(k => k.opportunity === "High");
   const contentTargets = results.filter(k => k.searchVolume <= 10 && k.cpc === 0);
-  const totalAdBudget = Math.round(results.filter(k => k.searchVolume > 10).reduce((sum, k) => sum + (k.searchVolume * k.cpc * 0.15), 0));
+  const totalAdBudget = Math.round(results.filter(k => k.searchVolume > 10).reduce((sum, k) => sum + (k.searchVolume * k.cpc * 0.30), 0));
 
   const getMarketInsights = () => {
     const insights = [];
