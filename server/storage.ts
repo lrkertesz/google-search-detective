@@ -1,4 +1,4 @@
-import { users, industries, settings, keywordResearches, type User, type InsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch, type KeywordResult } from "@shared/schema";
+import { users, industries, settings, keywordResearches, type User, type InsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -23,165 +23,7 @@ export interface IStorage {
   deleteKeywordResearch(id: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private industries: Map<number, Industry>;
-  private settings: Settings | undefined;
-  private keywordResearches: Map<number, KeywordResearch>;
-  private currentUserId: number;
-  private currentIndustryId: number;
-  private currentResearchId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.industries = new Map();
-    this.keywordResearches = new Map();
-    this.currentUserId = 1;
-    this.currentIndustryId = 1;
-    this.currentResearchId = 1;
-    
-    // Initialize with default industries
-    this.seedIndustries();
-  }
-
-  private seedIndustries() {
-    const defaultIndustries = [
-      { name: "hvac", label: "HVAC", keywords: ["HVAC repair", "air conditioning repair", "heating repair", "HVAC installation", "air conditioning installation", "heating installation", "HVAC service", "air conditioning service", "heating service", "HVAC contractor", "AC repair", "furnace repair"] },
-      { name: "plumbing", label: "Plumbing", keywords: ["plumber near me", "plumbing repair", "drain cleaning", "water heater repair", "plumbing service", "emergency plumber", "toilet repair", "pipe repair", "leak repair", "plumbing installation", "sewer cleaning", "faucet repair"] },
-      { name: "electrical", label: "Electrical", keywords: ["electrician near me", "electrical repair", "electrical installation", "electrical service", "emergency electrician", "circuit breaker repair", "outlet installation", "electrical wiring", "panel upgrade", "lighting installation", "electrical inspection", "electrical contractor"] },
-      { name: "digital-marketing", label: "Digital Marketing", keywords: ["digital marketing agency", "SEO services", "PPC management", "social media marketing", "web design", "online marketing", "search engine optimization", "digital advertising", "content marketing", "email marketing", "local SEO", "website development"] }
-    ];
-
-    defaultIndustries.forEach(industry => {
-      const id = this.currentIndustryId++;
-      const newIndustry: Industry = { ...industry, id };
-      this.industries.set(id, newIndustry);
-    });
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
-
-  // Industry methods
-  async getIndustries(): Promise<Industry[]> {
-    return Array.from(this.industries.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  async getIndustry(id: number): Promise<Industry | undefined> {
-    return this.industries.get(id);
-  }
-
-  async getIndustryByName(name: string): Promise<Industry | undefined> {
-    return Array.from(this.industries.values()).find(industry => industry.name === name);
-  }
-
-  async createIndustry(insertIndustry: InsertIndustry): Promise<Industry> {
-    const id = this.currentIndustryId++;
-    const industry: Industry = { 
-      id,
-      name: insertIndustry.name,
-      label: insertIndustry.label,
-      keywords: [...(insertIndustry.keywords || [])]
-    };
-    this.industries.set(id, industry);
-    return industry;
-  }
-
-  async updateIndustry(id: number, updateData: Partial<InsertIndustry>): Promise<Industry | undefined> {
-    const existing = this.industries.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Industry = { 
-      ...existing, 
-      ...updateData,
-      keywords: updateData.keywords ? [...updateData.keywords] : existing.keywords
-    };
-    this.industries.set(id, updated);
-    return updated;
-  }
-
-  async deleteIndustry(id: number): Promise<boolean> {
-    return this.industries.delete(id);
-  }
-
-  // Settings methods
-  async getSettings(): Promise<Settings | undefined> {
-    // Check environment variable first, then fall back to in-memory storage
-    const envApiKey = process.env.KEYWORDS_EVERYWHERE_API_KEY;
-    
-    if (envApiKey) {
-      // If environment variable exists, return settings with env API key
-      return {
-        id: 1,
-        keywordsEverywhereApiKey: envApiKey,
-        createdAt: this.settings?.createdAt || new Date(),
-        updatedAt: new Date()
-      };
-    }
-    
-    return this.settings;
-  }
-
-  async updateSettings(insertSettings: InsertSettings): Promise<Settings> {
-    if (!this.settings) {
-      this.settings = {
-        id: 1,
-        keywordsEverywhereApiKey: insertSettings.keywordsEverywhereApiKey || null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-    } else {
-      this.settings = {
-        ...this.settings,
-        ...insertSettings,
-        updatedAt: new Date()
-      };
-    }
-    return this.settings;
-  }
-
-  async createKeywordResearch(insertResearch: InsertKeywordResearch): Promise<KeywordResearch> {
-    const id = this.currentResearchId++;
-    const research: KeywordResearch = { 
-      id,
-      industry: insertResearch.industry,
-      cities: [...(insertResearch.cities || [])],
-      results: [...(insertResearch.results || [])] as KeywordResult[],
-      createdAt: new Date()
-    };
-    this.keywordResearches.set(id, research);
-    return research;
-  }
-
-  async getKeywordResearches(): Promise<KeywordResearch[]> {
-    return Array.from(this.keywordResearches.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  }
-
-  async getKeywordResearch(id: number): Promise<KeywordResearch | undefined> {
-    return this.keywordResearches.get(id);
-  }
-
-  async deleteKeywordResearch(id: number): Promise<boolean> {
-    return this.keywordResearches.delete(id);
-  }
-}
-
-// Database storage implementation
+// Database storage implementation (REAL DATA ONLY)
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -218,15 +60,24 @@ export class DatabaseStorage implements IStorage {
   async createIndustry(insertIndustry: InsertIndustry): Promise<Industry> {
     const [industry] = await db
       .insert(industries)
-      .values(insertIndustry)
+      .values({
+        name: insertIndustry.name,
+        label: insertIndustry.label,
+        keywords: insertIndustry.keywords
+      })
       .returning();
     return industry;
   }
 
   async updateIndustry(id: number, updateData: Partial<InsertIndustry>): Promise<Industry | undefined> {
+    const updateValues: any = {};
+    if (updateData.name !== undefined) updateValues.name = updateData.name;
+    if (updateData.label !== undefined) updateValues.label = updateData.label;
+    if (updateData.keywords !== undefined) updateValues.keywords = updateData.keywords;
+    
     const [industry] = await db
       .update(industries)
-      .set(updateData)
+      .set(updateValues)
       .where(eq(industries.id, id))
       .returning();
     return industry || undefined;
@@ -278,7 +129,11 @@ export class DatabaseStorage implements IStorage {
   async createKeywordResearch(insertResearch: InsertKeywordResearch): Promise<KeywordResearch> {
     const [research] = await db
       .insert(keywordResearches)
-      .values(insertResearch)
+      .values({
+        industry: insertResearch.industry,
+        cities: insertResearch.cities,
+        results: insertResearch.results
+      })
       .returning();
     return research;
   }

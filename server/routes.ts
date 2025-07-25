@@ -127,52 +127,7 @@ async function testApiKey(apiKey: string): Promise<{ valid: boolean; message: st
   }
 }
 
-// Mock Keywords Everywhere API call
-async function fetchKeywordData(keywords: string[]): Promise<Map<string, any>> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  const results = new Map();
-  
-  keywords.forEach(keyword => {
-    // Generate realistic mock data based on keyword characteristics
-    const isLongTail = keyword.split(' ').length > 3;
-    const hasLocation = keyword.includes('near me') || keyword.includes('local');
-    
-    let volume = 0;
-    let cpc = 0;
-    let competition = 0;
-    
-    if (Math.random() > 0.4) { // 60% chance of having volume (more realistic)
-      if (isLongTail) {
-        volume = Math.floor(Math.random() * 30) + 10; // 10-40 (more realistic for long-tail)
-        cpc = Math.random() * 3 + 1; // $1-4
-        competition = Math.random() * 30 + 10; // 10-40%
-      } else if (hasLocation) {
-        volume = Math.floor(Math.random() * 100) + 20; // 20-120 (local searches)
-        cpc = Math.random() * 8 + 2; // $2-10
-        competition = Math.random() * 40 + 30; // 30-70%
-      } else {
-        volume = Math.floor(Math.random() * 150) + 30; // 30-180 (much more realistic)
-        cpc = Math.random() * 12 + 3; // $3-15
-        competition = Math.random() * 50 + 40; // 40-90%
-      }
-    } else {
-      // Zero volume keywords still have CPC data
-      volume = 0;
-      cpc = Math.random() * 3 + 0.5; // $0.5-3.5
-      competition = 0; // Will be auto-corrected
-    }
-    
-    results.set(keyword, {
-      volume: Math.round(volume),
-      cpc: Math.round(cpc * 100) / 100,
-      competition: Math.round(competition)
-    });
-  });
-  
-  return results;
-}
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -363,20 +318,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalApiKey = apiKey || dbApiKey;
       let keywordData: Map<string, any>;
       
-      if (finalApiKey) {
-        try {
-          console.log("🔑 Using real Keywords Everywhere API for", keywordCombinations.length, "keywords");
-          // Use real Keywords Everywhere API
-          keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
-          console.log("✅ Real API data retrieved successfully");
-        } catch (error) {
-          console.error("❌ API failed, falling back to mock data:", error);
-          keywordData = await fetchKeywordData(keywordCombinations);
-        }
-      } else {
-        console.log("⚠️ No API key found in environment or database, using mock data for", keywordCombinations.length, "keywords");
-        // Use mock data if no API key
-        keywordData = await fetchKeywordData(keywordCombinations);
+      if (!finalApiKey) {
+        return res.status(400).json({ 
+          message: "Keywords Everywhere API key is required. Please configure your API key in the admin settings." 
+        });
+      }
+
+      try {
+        console.log("🔑 Using Keywords Everywhere API for", keywordCombinations.length, "keywords");
+        keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
+        console.log("✅ API data retrieved successfully");
+      } catch (error) {
+        console.error("❌ Keywords Everywhere API failed:", error);
+        return res.status(500).json({ 
+          message: "Failed to retrieve keyword data from Keywords Everywhere API. Please check your API key and try again.",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
       }
       
       // Process results
