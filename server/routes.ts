@@ -67,6 +67,18 @@ async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Prom
     console.log("📊 Total keywords returned by API:", results.size);
     console.log("📋 Sample API returned keywords:", Array.from(results.keys()).slice(0, 8));
     
+    // Check specifically for city-before vs city-after patterns in API response
+    const returnedKeywords = Array.from(results.keys());
+    const sentCityBefore = keywords.filter(k => /^[A-Z][a-zA-Z\s]+ [a-z]/.test(k));
+    const sentCityAfter = keywords.filter(k => /[a-z] [A-Z][a-zA-Z\s]+$/.test(k));
+    const returnedCityBefore = returnedKeywords.filter(k => /^[A-Z][a-zA-Z\s]+ [a-z]/.test(k));
+    const returnedCityAfter = returnedKeywords.filter(k => /[a-z] [A-Z][a-zA-Z\s]+$/.test(k));
+    
+    console.log(`📤 SENT: ${sentCityBefore.length} city-before, ${sentCityAfter.length} city-after`);
+    console.log(`📥 RECEIVED: ${returnedCityBefore.length} city-before, ${returnedCityAfter.length} city-after`);
+    console.log("📋 Sample city-before sent:", sentCityBefore.slice(0, 3));
+    console.log("📋 Sample city-before received:", returnedCityBefore.slice(0, 3));
+    
 
 
     return results;
