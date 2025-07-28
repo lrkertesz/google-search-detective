@@ -32,8 +32,7 @@ export default function Home() {
   const [currentKeyword, setCurrentKeyword] = useState("");
   const [sortField, setSortField] = useState<SortField>('searchVolume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [zeroVolumeSortField, setZeroVolumeSortField] = useState<SortField>('keyword');
-  const [zeroVolumeSortDirection, setZeroVolumeSortDirection] = useState<SortDirection>('asc');
+
   const { toast } = useToast();
 
   // Sorting functions
@@ -46,14 +45,7 @@ export default function Home() {
     }
   };
 
-  const handleZeroVolumeSort = (field: SortField) => {
-    if (zeroVolumeSortField === field) {
-      setZeroVolumeSortDirection(zeroVolumeSortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setZeroVolumeSortField(field);
-      setZeroVolumeSortDirection(field === 'keyword' || field === 'opportunity' ? 'asc' : 'desc');
-    }
-  };
+
 
   const sortKeywords = (keywords: KeywordResult[], field: SortField, direction: SortDirection) => {
     return [...keywords].sort((a, b) => {
@@ -276,15 +268,10 @@ export default function Home() {
   const totalCombinations = (industryData?.keywords?.length || 0) * cities.length * 2; // x2 for before/after variations
   const estimatedCost = (totalCombinations * 0.005).toFixed(2);
 
-  const highVolumeKeywords = currentResearch?.results.filter(k => k.searchVolume > 10) || [];
-  const zeroVolumeKeywords = currentResearch?.results.filter(k => k.searchVolume <= 10) || [];
+  const allKeywords = currentResearch?.results || [];
 
-  const exportHighVolumeCSV = () => {
-    exportToCSV(highVolumeKeywords, `keywords-high-volume-${Date.now()}.csv`);
-  };
-
-  const exportZeroVolumeCSV = () => {
-    exportToCSV(zeroVolumeKeywords, `keywords-zero-volume-${Date.now()}.csv`);
+  const exportCSV = () => {
+    exportToCSV(allKeywords, `keywords-complete-${Date.now()}.csv`);
   };
 
   const loadResearch = (research: KeywordResearch) => {
@@ -608,8 +595,8 @@ export default function Home() {
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Keyword Search Volumes & PPC Costs</h3>
                     <p className="text-neutral-dark mb-3">
-                      <span className="font-medium text-green-600">{highVolumeKeywords.length}</span> keywords with active customer searches - 
-                      <span className="font-medium text-blue-600">{highVolumeKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
+                      <span className="font-medium text-green-600">{allKeywords.length}</span> keywords from Keywords Everywhere - 
+                      <span className="font-medium text-blue-600">{allKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
                     </p>
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
                       <span className="font-medium">* PPC Budget Cost Calculation:</span> Search Volume × CPC × 30% click-through rate for #1 position = Monthly advertising budget needed to compete for this keyword
@@ -621,7 +608,7 @@ export default function Home() {
                       Click column headers to sort
                     </div>
                     <Button 
-                      onClick={exportHighVolumeCSV}
+                      onClick={exportCSV}
                       className="bg-green-600 hover:bg-green-700"
                     >
                       <Download size={16} className="mr-2" />
@@ -678,14 +665,19 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortKeywords(highVolumeKeywords, sortField, sortDirection).map((keyword, index) => (
+                    {sortKeywords(allKeywords, sortField, sortDirection).map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                        <TableCell className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</TableCell>
+                        <TableCell className="font-medium">
+                          {keyword.searchVolume > 0 ? `${keyword.searchVolume.toLocaleString()}/mo` : '0/mo'}
+                        </TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
                         <TableCell className="font-medium">{keyword.competition}%</TableCell>
                         <TableCell className="font-medium">
-                          ${Math.round(keyword.searchVolume * keyword.cpc * 0.30).toLocaleString()}/mo
+                          {keyword.searchVolume > 0 
+                            ? `$${Math.round(keyword.searchVolume * keyword.cpc * 0.30).toLocaleString()}/mo`
+                            : 'SEO Target'
+                          }
                         </TableCell>
                       </TableRow>
                     ))}
@@ -695,91 +687,7 @@ export default function Home() {
 
             </Card>
 
-            {/* Keywords with Zero Search Volume */}
-            <Card>
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Untapped Market Opportunities</h3>
-                    <p className="text-neutral-dark">
-                      <span className="font-medium text-amber-600">{zeroVolumeKeywords.length}</span> keywords with low/zero competition - 
-                      <span className="font-medium text-purple-600">Perfect for content marketing & SEO</span>
-                    </p>
-                  </div>
-                  <div className="flex space-x-3">
-                    <div className="text-sm text-gray-600 flex items-center">
-                      <ArrowDownWideNarrow size={16} className="mr-2" />
-                      Click column headers to sort
-                    </div>
-                    <Button 
-                      onClick={exportZeroVolumeCSV}
-                      className="bg-amber-600 hover:bg-amber-700"
-                    >
-                      <Download size={16} className="mr-2" />
-                      Export CSV
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <SortableTableHead 
-                        field="keyword" 
-                        currentField={zeroVolumeSortField} 
-                        currentDirection={zeroVolumeSortDirection} 
-                        onSort={handleZeroVolumeSort}
-                      >
-                        Keyword
-                      </SortableTableHead>
-                      <TableHead>Search Volume</TableHead>
-                      <SortableTableHead 
-                        field="cpc" 
-                        currentField={zeroVolumeSortField} 
-                        currentDirection={zeroVolumeSortDirection} 
-                        onSort={handleZeroVolumeSort}
-                      >
-                        CPC
-                      </SortableTableHead>
-                      <TableHead>Competition</TableHead>
-                      <SortableTableHead 
-                        field="opportunity" 
-                        currentField={zeroVolumeSortField} 
-                        currentDirection={zeroVolumeSortDirection} 
-                        onSort={handleZeroVolumeSort}
-                      >
-                        Strategy
-                      </SortableTableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortKeywords(zeroVolumeKeywords, zeroVolumeSortField, zeroVolumeSortDirection).map((keyword, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                        <TableCell>
-                          <Badge className="bg-amber-600 text-white font-semibold">
-                            &lt;10/mo
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-100 text-green-800">
-                            0% (Auto-corrected)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-blue-100 text-blue-800">
-                            📝 Content Target
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
+
           </div>
         )}
       </div>
