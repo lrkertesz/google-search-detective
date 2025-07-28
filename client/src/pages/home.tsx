@@ -593,10 +593,14 @@ export default function Home() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Keyword Search Volumes & PPC Costs</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Complete Keyword Research Results</h3>
                     <p className="text-neutral-dark mb-3">
                       <span className="font-medium text-green-600">{allKeywords.length}</span> keywords from Keywords Everywhere - 
-                      <span className="font-medium text-blue-600">{allKeywords.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
+                      <span className="font-medium text-blue-600">{allKeywords.reduce((sum: number, k: KeywordResult) => sum + k.searchVolume, 0).toLocaleString()}</span> total monthly searches
+                    </p>
+                    <p className="text-sm text-gray-600 mb-3">
+                      <span className="font-medium text-green-600">{allKeywords.filter(k => k.searchVolume > 0).length}</span> keywords with traffic • 
+                      <span className="font-medium text-amber-600">{allKeywords.filter(k => k.searchVolume === 0).length}</span> zero-volume (SEO targets)
                     </p>
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
                       <span className="font-medium">* PPC Budget Cost Calculation:</span> Search Volume × CPC × 30% click-through rate for #1 position = Monthly advertising budget needed to compete for this keyword
