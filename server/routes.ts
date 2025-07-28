@@ -62,6 +62,11 @@ async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Prom
       }
     });
 
+    // Debug: Show what keywords API actually returned vs what we sent
+    console.log("🔍 Total keywords sent to API:", keywords.length);
+    console.log("📊 Total keywords returned by API:", results.size);
+    console.log("📋 Sample API returned keywords:", Array.from(results.keys()).slice(0, 8));
+
     return results;
   } catch (error) {
     console.error("Keywords Everywhere API error:", error);
