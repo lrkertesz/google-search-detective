@@ -242,23 +242,30 @@ export default function Home() {
     setProcessingProgress(0);
     setCurrentKeyword("");
 
-    // Simulate progress
-    const totalKeywords = (industryData?.keywords?.length || 0) * cities.length;
+    // Simulate progress (now includes both before and after variations)
+    const totalKeywords = (industryData?.keywords?.length || 0) * cities.length * 2; // x2 for before/after variations
     let processed = 0;
     const interval = setInterval(() => {
       processed++;
       setProcessingProgress((processed / totalKeywords) * 100);
       if (industryData?.keywords && cities.length > 0) {
-        const keywordIndex = processed % industryData.keywords.length;
-        const cityIndex = Math.floor((processed - 1) / industryData.keywords.length);
+        const keywordIndex = Math.floor((processed - 1) / 2) % industryData.keywords.length;
+        const cityIndex = Math.floor((processed - 1) / (industryData.keywords.length * 2));
+        const isAfterVariation = (processed - 1) % 2 === 0;
+        
         if (cityIndex < cities.length && keywordIndex < industryData.keywords.length) {
-          setCurrentKeyword(`"${industryData.keywords[keywordIndex]} ${cities[cityIndex]}"`);
+          const keyword = industryData.keywords[keywordIndex];
+          const city = cities[cityIndex];
+          const displayKeyword = isAfterVariation 
+            ? `"${keyword} ${city}"` 
+            : `"${city} ${keyword}"`;
+          setCurrentKeyword(displayKeyword);
         }
       }
       if (processed >= totalKeywords) {
         clearInterval(interval);
       }
-    }, 100);
+    }, 50); // Faster interval since we have more keywords
 
     startResearchMutation.mutate({
       industry: selectedIndustry,
@@ -266,7 +273,7 @@ export default function Home() {
     });
   };
 
-  const totalCombinations = (industryData?.keywords?.length || 0) * cities.length;
+  const totalCombinations = (industryData?.keywords?.length || 0) * cities.length * 2; // x2 for before/after variations
   const estimatedCost = (totalCombinations * 0.005).toFixed(2);
 
   const highVolumeKeywords = currentResearch?.results.filter(k => k.searchVolume > 10) || [];
@@ -480,7 +487,8 @@ export default function Home() {
               {selectedIndustry && cities.length > 0 && (
                 <div className="text-sm text-neutral-dark">
                   <span className="font-medium">{industryData?.keywords?.length || 0}</span> base keywords × 
-                  <span className="font-medium"> {cities.length}</span> cities = 
+                  <span className="font-medium"> {cities.length}</span> cities × 
+                  <span className="font-medium"> 2</span> variations (before/after) = 
                   <span className="font-medium text-primary"> {totalCombinations}</span> total keyword combinations
                 </div>
               )}
