@@ -377,56 +377,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       keywordCombinations.forEach(combination => {
         const data = keywordData.get(combination);
+        
+        // Always include all keyword combinations, even if no API data
+        let searchVolume = 0;
+        let cpc = 0;
+        let competition = 0;
+        let opportunity: "High" | "Medium" | "Low" = "Low";
+        
         if (data) {
+          searchVolume = data.volume;
+          cpc = data.cpc;
+          competition = data.volume === 0 ? 0 : data.competition;
+          
           // Determine opportunity level based on business value
-          // High opportunity: Good volume + Low CPC (affordable to bid on)
-          // Medium opportunity: Decent volume OR low CPC but not both
-          // Low opportunity: Low volume AND high CPC
-          let opportunity: "High" | "Medium" | "Low" = "Low";
-          
-          const hasGoodVolume = data.volume >= 50; // Minimum viable search volume
-          const hasHighVolume = data.volume >= 200; // Strong search volume
-          const hasLowCPC = data.cpc <= 5.00; // Affordable cost per click
-          const hasVeryLowCPC = data.cpc <= 2.00; // Very affordable
-          const hasExcellentCPC = data.cpc <= 1.50; // Excellent value
-          
-          // Business-focused opportunity logic accounting for Google's broad matching behavior
-          // Note: $0.00 CPC keywords may not perform as expected due to Google showing
-          // higher-bid "similar" keywords instead of exact matches
-          
+          const hasGoodVolume = data.volume >= 50;
+          const hasHighVolume = data.volume >= 200;
+          const hasLowCPC = data.cpc <= 5.00;
+          const hasVeryLowCPC = data.cpc <= 2.00;
+          const hasExcellentCPC = data.cpc <= 1.50;
           const isZeroCPC = data.cpc === 0;
           
           if (hasGoodVolume && hasExcellentCPC && !isZeroCPC) {
-            // Good volume + excellent cost (but not zero) = HIGH
             opportunity = "High";
           } else if (hasHighVolume && hasVeryLowCPC && !isZeroCPC) {
-            // High volume + very low cost (but not zero) = HIGH
             opportunity = "High";
           } else if (hasGoodVolume && hasVeryLowCPC && !isZeroCPC) {
-            // Good volume + very low cost (but not zero) = HIGH
             opportunity = "High";
           } else if (hasGoodVolume && hasLowCPC) {
-            // Good volume + reasonable cost = MEDIUM
             opportunity = "Medium";
           } else if (hasVeryLowCPC && data.volume >= 10 && !isZeroCPC) {
-            // Very cheap clicks = MEDIUM (but downgrade zero-cost keywords)
             opportunity = "Medium";
           } else if (isZeroCPC && data.volume >= 50) {
-            // Zero CPC with decent volume = MEDIUM (potential but risky due to broad matching)
             opportunity = "Medium";
           } else if (isZeroCPC && data.volume >= 10) {
-            // Zero CPC with low volume = LOW (Google likely shows competing ads)
             opportunity = "Low";
           }
-          
-          results.push({
-            keyword: combination, // Store complete keyword phrase including city
-            searchVolume: data.volume,
-            cpc: data.cpc,
-            competition: data.volume === 0 ? 0 : data.competition, // Auto-correct zero volume
-            opportunity
-          });
         }
+        
+        // Include ALL keyword combinations in results
+        results.push({
+          keyword: combination,
+          searchVolume: searchVolume,
+          cpc: cpc,
+          competition: competition,
+          opportunity
+        });
       });
       
       // Save to storage
