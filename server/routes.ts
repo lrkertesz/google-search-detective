@@ -66,6 +66,8 @@ async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Prom
     console.log("🔍 Total keywords sent to API:", keywords.length);
     console.log("📊 Total keywords returned by API:", results.size);
     console.log("📋 Sample API returned keywords:", Array.from(results.keys()).slice(0, 8));
+    
+
 
     return results;
   } catch (error) {
