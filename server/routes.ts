@@ -311,6 +311,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
       
+      console.log("🔍 Generated keyword combinations sample:", keywordCombinations.slice(0, 10));
+      
       // Check if we have API key for real data (check both environment and database)
       const apiKey = process.env.KEYWORDS_EVERYWHERE_API_KEY || 
                     process.env.KWE_API_KEY;
@@ -329,8 +331,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         console.log("🔑 Using Keywords Everywhere API for", keywordCombinations.length, "keywords");
+        console.log("📋 First 10 keywords being sent to API:", keywordCombinations.slice(0, 10));
         keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
         console.log("✅ API data retrieved successfully");
+        console.log("📊 API returned data for", keywordData.size, "keywords");
       } catch (error) {
         console.error("❌ Keywords Everywhere API failed:", error);
         return res.status(500).json({ 
@@ -341,6 +345,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Process results
       const results: KeywordResult[] = [];
+      console.log("🔍 Processing results for", keywordCombinations.length, "keyword combinations");
+      
+      keywordCombinations.forEach(combination => {
+        const data = keywordData.get(combination);
+        if (data) {
+          console.log(`✅ Found data for: "${combination}"`);
+        } else {
+          console.log(`❌ No data for: "${combination}"`);
+        }
+      });
+      
       keywordCombinations.forEach(combination => {
         const data = keywordData.get(combination);
         if (data) {
