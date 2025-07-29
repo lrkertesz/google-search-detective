@@ -66,6 +66,16 @@ export default function HistoryPage() {
     exportToCSV(research.results, `keywords-${research.industry}-${Date.now()}.csv`);
   };
 
+  const exportCSVWithVolume = (research: KeywordResearch) => {
+    const keywordsWithVolume = research.results.filter(k => k.searchVolume > 0);
+    exportToCSV(keywordsWithVolume, `keywords-ppc-${research.industry}-${Date.now()}.csv`);
+  };
+
+  const exportCSVWithoutVolume = (research: KeywordResearch) => {
+    const keywordsWithoutVolume = research.results.filter(k => k.searchVolume === 0);
+    exportToCSV(keywordsWithoutVolume, `keywords-seo-${research.industry}-${Date.now()}.csv`);
+  };
+
   const handleDelete = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this research?')) {
@@ -113,30 +123,64 @@ export default function HistoryPage() {
                   </p>
                 </div>
               </div>
-              <Button onClick={() => exportCSV(selectedResearch)} className="flex items-center space-x-2">
-                <Download size={16} />
-                <span>Export CSV</span>
-              </Button>
+              <div className="flex space-x-2">
+                <Button onClick={() => exportCSVWithVolume(selectedResearch)} className="bg-green-600 hover:bg-green-700 flex items-center space-x-2">
+                  <Download size={16} />
+                  <span>PPC Keywords</span>
+                </Button>
+                <Button onClick={() => exportCSVWithoutVolume(selectedResearch)} className="bg-amber-600 hover:bg-amber-700 flex items-center space-x-2">
+                  <Download size={16} />
+                  <span>SEO Targets</span>
+                </Button>
+                <Button onClick={() => exportCSV(selectedResearch)} variant="outline" className="flex items-center space-x-2">
+                  <Download size={16} />
+                  <span>All Keywords</span>
+                </Button>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Results */}
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+          {/* Summary Stats */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Research Overview</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {selectedResearch.results.filter(k => k.searchVolume > 0).length}
+                  </div>
+                  <div className="text-sm text-gray-600">PPC Keywords</div>
+                </div>
+                <div className="text-center p-4 bg-amber-50 rounded-lg">
+                  <div className="text-2xl font-bold text-amber-600">
+                    {selectedResearch.results.filter(k => k.searchVolume === 0).length}
+                  </div>
+                  <div className="text-sm text-gray-600">SEO Targets</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {selectedResearch.results.reduce((sum, k) => sum + k.searchVolume, 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Volume</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {selectedResearch.results.filter(k => k.opportunity === "High").length}
+                  </div>
+                  <div className="text-sm text-gray-600">High Opportunity</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Keywords with Search Volume */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Research Results ({selectedResearch.results.length} keywords)</span>
-                <div className="flex items-center space-x-4 text-sm text-neutral-dark">
-                  <span className="flex items-center space-x-1">
-                    <MapPin size={14} />
-                    <span>{selectedResearch.cities.length} cities</span>
-                  </span>
-                  <span className="flex items-center space-x-1">
-                    <Building2 size={14} />
-                    <span>{selectedResearch.industry}</span>
-                  </span>
-                </div>
+                <span>Keywords with Search Volume - PPC Opportunities ({selectedResearch.results.filter(k => k.searchVolume > 0).length} keywords)</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -152,7 +196,7 @@ export default function HistoryPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedResearch.results.map((result, index) => (
+                    {selectedResearch.results.filter(k => k.searchVolume > 0).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
                         <td className="py-3 px-4 text-right">{result.searchVolume.toLocaleString()}</td>
@@ -168,6 +212,54 @@ export default function HistoryPage() {
                             }
                           >
                             {result.opportunity}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Keywords without Search Volume */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Zero Volume Keywords - SEO Content Targets ({selectedResearch.results.filter(k => k.searchVolume === 0).length} keywords)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Keyword</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-700">Competition</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-700">Content Strategy</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-700">SEO Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedResearch.results.filter(k => k.searchVolume === 0).map((result, index) => (
+                      <tr key={index} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
+                        <td className="py-3 px-4 text-center">{result.competition}%</td>
+                        <td className="py-3 px-4 text-center">
+                          <span className="text-blue-600">Blog Post / Landing Page</span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <Badge 
+                            variant="secondary"
+                            className={
+                              result.competition <= 30 ? "bg-green-100 text-green-800" :
+                              result.competition <= 60 ? "bg-yellow-100 text-yellow-800" :
+                              "bg-red-100 text-red-800"
+                            }
+                          >
+                            {result.competition <= 30 ? "High Priority" :
+                             result.competition <= 60 ? "Medium Priority" :
+                             "Low Priority"}
                           </Badge>
                         </td>
                       </tr>
