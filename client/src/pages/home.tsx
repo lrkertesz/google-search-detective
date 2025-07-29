@@ -171,9 +171,15 @@ export default function Home() {
       .map(city => city.trim())
       .filter(city => city.length > 0 && !cities.includes(city));
     
+    console.log("🏙️ Adding cities from input:", cityInput);
+    console.log("🔍 Parsed cities:", newCities);
+    console.log("📋 Cities already in list:", cities);
+    
     if (newCities.length > 0) {
-      setCities([...cities, ...newCities]);
+      const updatedCities = [...cities, ...newCities];
+      setCities(updatedCities);
       setCityInput("");
+      console.log("✅ Final cities list:", updatedCities);
       toast({
         title: "Cities Added",
         description: `Added ${newCities.length} ${newCities.length === 1 ? 'city' : 'cities'}: ${newCities.join(', ')}`,
@@ -184,6 +190,17 @@ export default function Home() {
         description: "This city is already in your list",
         variant: "destructive",
       });
+    }
+  };
+
+  // Auto-process comma-separated lists on paste
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pastedText = e.clipboardData.getData('text');
+    if (pastedText.includes(',')) {
+      // Small delay to let the input update, then auto-add cities
+      setTimeout(() => {
+        addCity();
+      }, 100);
     }
   };
 
@@ -372,10 +389,11 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Input
-                  placeholder="Add ALL cities before starting research! Enter multiple cities separated by commas (e.g., Miami, Orlando, Tampa, Jacksonville, Fort Lauderdale, Gainesville)"
+                  placeholder="Paste your comma-separated city list from the market revenue app here"
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  onPaste={handlePaste}
                   className="flex-1"
                 />
                 <Button 
