@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft } from "lucide-react";
+import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { exportToCSV } from "@/lib/csvExport";
@@ -13,6 +14,8 @@ import type { KeywordResearch } from "@shared/schema";
 export default function HistoryPage() {
   const { toast } = useToast();
   const [selectedResearch, setSelectedResearch] = useState<KeywordResearch | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState<string>("");
 
   // Get research history
   const { data: researchHistory, isLoading } = useQuery<KeywordResearch[]>({
@@ -40,6 +43,57 @@ export default function HistoryPage() {
       });
     },
   });
+
+  // Update research title mutation
+  const updateResearchMutation = useMutation({
+    mutationFn: async ({ id, title }: { id: number; title: string }) => {
+      const response = await apiRequest("PUT", `/api/keyword-research/${id}`, { title });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
+      setEditingId(null);
+      setEditingTitle("");
+      toast({
+        title: "Title Updated",
+        description: "Research title has been updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const startEditing = (research: KeywordResearch) => {
+    setEditingId(research.id);
+    setEditingTitle(research.title || getDefaultTitle(research));
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
+  const saveTitle = () => {
+    if (editingId && editingTitle.trim()) {
+      updateResearchMutation.mutate({ id: editingId, title: editingTitle.trim() });
+    }
+  };
+
+  const getDefaultTitle = (research: KeywordResearch) => {
+    return `${research.industry} Research - ${research.cities.join(', ')}`;
+  };
+
+  const handleDelete = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this research?")) {
+      deleteResearchMutation.mutate(id);
+    }
+  };
 
   const formatDate = (date: string | Date) => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -76,12 +130,7 @@ export default function HistoryPage() {
     exportToCSV(keywordsWithoutVolume, `keywords-seo-${research.industry}-${Date.now()}.csv`);
   };
 
-  const handleDelete = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm('Are you sure you want to delete this research?')) {
-      deleteResearchMutation.mutate(id);
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -115,9 +164,48 @@ export default function HistoryPage() {
                   <Search className="text-white" size={20} />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    {getIndustryIcon(selectedResearch.industry)} {selectedResearch.industry} Research
-                  </h1>
+                  {editingId === selectedResearch.id ? (
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        className="text-xl font-semibold"
+                        placeholder="Enter research title..."
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveTitle();
+                          if (e.key === 'Escape') cancelEditing();
+                        }}
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        onClick={saveTitle}
+                        disabled={updateResearchMutation.isPending}
+                      >
+                        <Check size={16} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={cancelEditing}
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h1 className="text-xl font-semibold text-gray-900">
+                        {getIndustryIcon(selectedResearch.industry)} {selectedResearch.title || getDefaultTitle(selectedResearch)}
+                      </h1>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => startEditing(selectedResearch)}
+                      >
+                        <Edit2 size={14} />
+                      </Button>
+                    </div>
+                  )}
                   <p className="text-sm text-neutral-dark">
                     {selectedResearch.cities.join(', ')} • {formatDate(selectedResearch.createdAt)}
                   </p>
@@ -314,7 +402,7 @@ export default function HistoryPage() {
             {researchHistory.map((research) => (
               <Card 
                 key={research.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="group cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => setSelectedResearch(research)}
               >
                 <CardHeader>
@@ -322,7 +410,60 @@ export default function HistoryPage() {
                     <div className="flex items-center space-x-3">
                       <div className="text-2xl">{getIndustryIcon(research.industry)}</div>
                       <div>
-                        <CardTitle className="text-lg">{research.industry} Research</CardTitle>
+                        {editingId === research.id ? (
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              className="text-lg font-semibold"
+                              placeholder="Enter research title..."
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveTitle();
+                                if (e.key === 'Escape') cancelEditing();
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              autoFocus
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                saveTitle();
+                              }}
+                              disabled={updateResearchMutation.isPending}
+                            >
+                              <Check size={16} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                cancelEditing();
+                              }}
+                            >
+                              <X size={16} />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <CardTitle className="text-lg">
+                              {research.title || getDefaultTitle(research)}
+                            </CardTitle>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(research);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 size={14} />
+                            </Button>
+                          </div>
+                        )}
                         <div className="flex items-center space-x-4 text-sm text-neutral-dark mt-1">
                           <span className="flex items-center space-x-1">
                             <Calendar size={14} />

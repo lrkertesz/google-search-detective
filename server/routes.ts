@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { keywordSearchRequestSchema, insertIndustrySchema, insertSettingsSchema, type KeywordResult, type Industry } from "@shared/schema";
+import { keywordSearchRequestSchema, insertIndustrySchema, insertSettingsSchema, updateKeywordResearchSchema, type KeywordResult, type Industry } from "@shared/schema";
 import { z } from "zod";
 
 // Keywords Everywhere API integration
@@ -462,6 +462,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(research);
     } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update specific research (for title editing)
+  app.put("/api/keyword-research/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = updateKeywordResearchSchema.parse(req.body);
+      const research = await storage.updateKeywordResearch(id, validatedData);
+      
+      if (!research) {
+        return res.status(404).json({ message: "Research not found" });
+      }
+      
+      res.json(research);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
       res.status(500).json({ message: error.message });
     }
   });

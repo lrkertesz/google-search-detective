@@ -1,4 +1,4 @@
-import { users, industries, settings, keywordResearches, type User, type InsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch } from "@shared/schema";
+import { users, industries, settings, keywordResearches, type User, type InsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch, type UpdateKeywordResearch } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -20,6 +20,7 @@ export interface IStorage {
   createKeywordResearch(research: InsertKeywordResearch): Promise<KeywordResearch>;
   getKeywordResearches(): Promise<KeywordResearch[]>;
   getKeywordResearch(id: number): Promise<KeywordResearch | undefined>;
+  updateKeywordResearch(id: number, research: UpdateKeywordResearch): Promise<KeywordResearch | undefined>;
   deleteKeywordResearch(id: number): Promise<boolean>;
 }
 
@@ -129,13 +130,18 @@ export class DatabaseStorage implements IStorage {
   async createKeywordResearch(insertResearch: InsertKeywordResearch): Promise<KeywordResearch> {
     const [research] = await db
       .insert(keywordResearches)
-      .values({
-        industry: insertResearch.industry,
-        cities: insertResearch.cities,
-        results: insertResearch.results
-      })
+      .values(insertResearch)
       .returning();
     return research;
+  }
+
+  async updateKeywordResearch(id: number, updateResearch: UpdateKeywordResearch): Promise<KeywordResearch | undefined> {
+    const [research] = await db
+      .update(keywordResearches)
+      .set(updateResearch)
+      .where(eq(keywordResearches.id, id))
+      .returning();
+    return research || undefined;
   }
 
   async getKeywordResearches(): Promise<KeywordResearch[]> {

@@ -25,6 +25,7 @@ export const settings = pgTable("settings", {
 
 export const keywordResearches = pgTable("keyword_researches", {
   id: serial("id").primaryKey(),
+  title: text("title"),
   industry: text("industry").notNull(),
   cities: json("cities").$type<string[]>().notNull(),
   results: json("results").$type<KeywordResult[]>().notNull(),
@@ -47,10 +48,15 @@ export const insertSettingsSchema = createInsertSchema(settings).pick({
 });
 
 export const insertKeywordResearchSchema = createInsertSchema(keywordResearches).pick({
+  title: true,
   industry: true,
   cities: true,
   results: true,
 });
+
+export const updateKeywordResearchSchema = createInsertSchema(keywordResearches).pick({
+  title: true,
+}).partial();
 
 export const keywordSearchRequestSchema = z.object({
   industry: z.string().min(1),
@@ -64,6 +70,7 @@ export type Industry = typeof industries.$inferSelect;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type Settings = typeof settings.$inferSelect;
 export type InsertKeywordResearch = z.infer<typeof insertKeywordResearchSchema>;
+export type UpdateKeywordResearch = z.infer<typeof updateKeywordResearchSchema>;
 export type KeywordResearch = typeof keywordResearches.$inferSelect;
 export type KeywordSearchRequest = z.infer<typeof keywordSearchRequestSchema>;
 
