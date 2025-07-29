@@ -389,16 +389,6 @@ export default function Home() {
               Step 2: Target Cities
             </Label>
             <div className="space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
-                <div className="font-medium text-yellow-800 mb-1">📋 Copy-Paste Workflow:</div>
-                <div className="text-yellow-700">
-                  1. Copy comma-separated city list from your market revenue app<br/>
-                  2. Paste it in the field below<br/>
-                  3. Click "Add Cities" button to process all cities<br/>
-                  4. Verify all cities appear as badges before starting research
-                </div>
-              </div>
-              
               <div className="flex items-center space-x-4">
                 <Input
                   placeholder="Paste your comma-separated city list from the market revenue app here, then click Add Cities"
@@ -459,11 +449,7 @@ export default function Home() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-            <div className="text-sm text-neutral-dark flex items-center">
-              <Info size={14} className="mr-1" />
-              API cost: ~${estimatedCost} for this research
-            </div>
+          <div className="flex items-center justify-end pt-6 border-t border-gray-200">
             <div className="flex space-x-4">
               <Button variant="outline">
                 <Eye size={16} className="mr-2" />
