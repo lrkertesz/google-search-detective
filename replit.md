@@ -43,6 +43,7 @@ Business Context: User is building a comprehensive business intelligence suite w
 - **Routing**: Wouter for lightweight client-side routing
 - **Form Handling**: React Hook Form with Zod validation
 - **Admin Panel**: Dedicated admin page for managing industries, keywords, and API configuration
+- **Research Management**: Inline editing for research titles with auto-save functionality
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
@@ -57,7 +58,9 @@ Business Context: User is building a comprehensive business intelligence suite w
 
 #### Database Schema
 - **Users Table**: Basic user authentication with username/password
-- **Keyword Researches Table**: Stores research results with industry, cities, and keyword data as JSON
+- **Keyword Researches Table**: Stores research results with customizable titles, industry, cities, and keyword data as JSON
+- **Industries Table**: Configurable industry definitions with keyword lists
+- **Settings Table**: API configuration and system settings
 - **Shared Types**: Common TypeScript interfaces between client and server
 
 #### API Endpoints
@@ -65,22 +68,26 @@ Business Context: User is building a comprehensive business intelligence suite w
 - `POST /api/keyword-research` - Start new keyword research
 - `GET /api/keyword-research` - Retrieve research history
 - `GET /api/keyword-research/:id` - Get specific research results
+- `PUT /api/keyword-research/:id` - Update research title for better organization
+- `DELETE /api/keyword-research/:id` - Delete research records
 
 #### Frontend Features
 - Industry selection (HVAC, Plumbing, Electrical, Digital Marketing)
-- Multi-city keyword research
+- Multi-city keyword research with dual keyword variations (city-first and keyword-first)
 - Real-time progress tracking during research
-- CSV export functionality
-- Research history with detailed results viewing
+- Separated results sections: PPC Keywords (with volume) and SEO Content Targets (zero volume)
+- Multiple CSV export options: PPC Keywords, SEO Targets, and All Keywords
+- Research history with detailed results viewing and inline title editing
 - Responsive design with mobile support
 
 ### Data Flow
 
 1. **Research Initiation**: User selects industry and enters cities
-2. **Keyword Generation**: Server generates industry-specific keywords for each city
-3. **Data Processing**: Simulated keyword metrics (search volume, CPC, competition)
-4. **Result Storage**: Research saved to database with structured results
-5. **Export Options**: Users can export results to CSV format
+2. **Keyword Generation**: Server generates both "keyword city" and "city keyword" variations for comprehensive coverage
+3. **API Integration**: Real keyword data retrieved from Keywords Everywhere API (no mock data)
+4. **Results Processing**: Keywords separated into PPC opportunities (with volume) and SEO targets (zero volume)
+5. **Result Storage**: Research saved to database with customizable titles for organization
+6. **Export Options**: Multiple CSV export formats for different use cases
 
 ### External Dependencies
 
