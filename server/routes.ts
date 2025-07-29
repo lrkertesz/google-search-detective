@@ -313,6 +313,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = keywordSearchRequestSchema.parse(req.body);
       const { industry, cities } = validatedData;
       
+      // Debug: Log exactly what cities were received
+      console.log("🎯 RESEARCH REQUEST RECEIVED:");
+      console.log("📍 Industry:", industry);
+      console.log("🏙️  Cities received:", cities);
+      console.log("📊 Cities count:", cities.length);
+      console.log("🔍 Cities list:", cities.map((city, index) => `${index + 1}. ${city}`).join(', '));
+      
       // Get base keywords for the industry from database
       const industryData = await storage.getIndustryByName(industry);
       if (!industryData) {

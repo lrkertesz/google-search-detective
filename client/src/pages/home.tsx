@@ -207,6 +207,16 @@ export default function Home() {
       return;
     }
 
+    // Debug: Show exactly what cities are being sent
+    console.log("🚀 Starting research with cities:", cities);
+    console.log("📊 Total cities count:", cities.length);
+    
+    // Show confirmation toast with city count
+    toast({
+      title: "Research Starting",
+      description: `Analyzing ${cities.length} ${cities.length === 1 ? 'city' : 'cities'}: ${cities.join(', ')}`,
+    });
+
     setIsProcessing(true);
     setProcessingProgress(0);
     setCurrentKeyword("");
@@ -362,7 +372,7 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Input
-                  placeholder="Enter city names separated by commas (e.g., Miami, Orlando, Tampa, Jacksonville, Fort Lauderdale, Gainesville)"
+                  placeholder="Add ALL cities before starting research! Enter multiple cities separated by commas (e.g., Miami, Orlando, Tampa, Jacksonville, Fort Lauderdale, Gainesville)"
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -401,11 +411,17 @@ export default function Home() {
               )}
 
               {selectedIndustry && cities.length > 0 && (
-                <div className="text-sm text-neutral-dark">
-                  <span className="font-medium">{industryData?.keywords?.length || 0}</span> base keywords × 
-                  <span className="font-medium"> {cities.length}</span> cities × 
-                  <span className="font-medium"> 2</span> variations (before/after) = 
-                  <span className="font-medium text-primary"> {totalCombinations}</span> total keyword combinations
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                  <div className="text-sm text-neutral-dark">
+                    <span className="font-medium">{industryData?.keywords?.length || 0}</span> base keywords × 
+                    <span className="font-medium"> {cities.length}</span> cities × 
+                    <span className="font-medium"> 2</span> variations (before/after) = 
+                    <span className="font-medium text-primary"> {totalCombinations}</span> total keyword combinations
+                  </div>
+                  <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
+                    <strong>Important:</strong> Make sure all cities are added before starting research. 
+                    Current cities: <span className="font-medium">{cities.join(', ')}</span>
+                  </div>
                 </div>
               )}
             </div>
