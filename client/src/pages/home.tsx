@@ -674,10 +674,16 @@ export default function Home() {
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Zero Volume Keywords - SEO Content Targets</h3>
                     <p className="text-neutral-dark mb-3">
-                      <span className="font-medium text-amber-600">{keywordsWithoutVolume.length}</span> keywords with no search volume data - Perfect for long-term SEO content strategy
+                      <span className="font-medium text-amber-600">{keywordsWithoutVolume.length}</span> keywords with no reported search volume data
                     </p>
-                    <div className="text-sm text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                      <span className="font-medium">🎯 SEO Content Strategy:</span> These keywords represent untapped opportunities for blog posts, landing pages, and content marketing to establish market authority.
+                    <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-3">
+                      <div className="font-medium text-blue-800 mb-2">📊 Search Volume Disclaimer:</div>
+                      <p className="text-blue-700 mb-2">
+                        Google does not report search traffic on keyword phrases that get fewer than 10 searches per month on average.
+                      </p>
+                      <p className="text-blue-700">
+                        These keyword phrases likely represent an opportunity to create a blog post that, if it exactly matches the keyword phrase, will likely appear on the first page of Google search in a short period of time.
+                      </p>
                     </div>
                   </div>
                   <div className="flex space-x-3">
@@ -708,7 +714,7 @@ export default function Home() {
                       >
                         Keyword
                       </SortableTableHead>
-                      <TableHead>Competition Level</TableHead>
+                      <TableHead>Search Volume</TableHead>
                       <TableHead>Content Strategy</TableHead>
                       <TableHead>SEO Priority</TableHead>
                     </TableRow>
@@ -718,12 +724,7 @@ export default function Home() {
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <div 
-                              className={`h-3 w-3 rounded-full ${getCompetitionColor(keyword.competition)}`}
-                            />
-                            <span>{keyword.competition}%</span>
-                          </div>
+                          <span className="text-gray-600">0</span>
                         </TableCell>
                         <TableCell>
                           <span className="text-blue-600">Blog Post / Landing Page</span>

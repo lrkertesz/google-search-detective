@@ -318,12 +318,21 @@ export default function HistoryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+                <div className="font-medium text-blue-800 mb-2">📊 Search Volume Disclaimer:</div>
+                <p className="text-blue-700 mb-2">
+                  Google does not report search traffic on keyword phrases that get fewer than 10 searches per month on average.
+                </p>
+                <p className="text-blue-700">
+                  These keyword phrases likely represent an opportunity to create a blog post that, if it exactly matches the keyword phrase, will likely appear on the first page of Google search in a short period of time.
+                </p>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium text-gray-700">Keyword</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-700">Competition</th>
+                      <th className="text-center py-3 px-4 font-medium text-gray-700">Search Volume</th>
                       <th className="text-center py-3 px-4 font-medium text-gray-700">Content Strategy</th>
                       <th className="text-center py-3 px-4 font-medium text-gray-700">SEO Priority</th>
                     </tr>
@@ -332,7 +341,9 @@ export default function HistoryPage() {
                     {selectedResearch.results.filter(k => k.searchVolume === 0).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
-                        <td className="py-3 px-4 text-center">{result.competition}%</td>
+                        <td className="py-3 px-4 text-center">
+                          <span className="text-gray-600">0</span>
+                        </td>
                         <td className="py-3 px-4 text-center">
                           <span className="text-blue-600">Blog Post / Landing Page</span>
                         </td>
