@@ -450,24 +450,18 @@ export default function Home() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end pt-6 border-t border-gray-200">
-            <div className="flex space-x-4">
-              <Button variant="outline">
-                <Eye size={16} className="mr-2" />
-                Preview Keywords
-              </Button>
-              <Button 
-                onClick={startResearch}
-                disabled={!selectedIndustry || cities.length === 0 || isProcessing}
-                className="bg-primary hover:bg-primary-dark"
-              >
-                {isProcessing ? (
-                  <Loader2 size={16} className="mr-2 animate-spin" />
-                ) : (
-                  <Search size={16} className="mr-2" />
-                )}
-                Start Research
-              </Button>
-            </div>
+            <Button 
+              onClick={startResearch}
+              disabled={!selectedIndustry || cities.length === 0 || isProcessing}
+              className="bg-primary hover:bg-primary-dark"
+            >
+              {isProcessing ? (
+                <Loader2 size={16} className="mr-2 animate-spin" />
+              ) : (
+                <Search size={16} className="mr-2" />
+              )}
+              Start Research
+            </Button>
           </div>
         </Card>
 
