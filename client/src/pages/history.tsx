@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X } from "lucide-react";
+import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ export default function HistoryPage() {
   const [selectedResearch, setSelectedResearch] = useState<KeywordResearch | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // Get research history
   const { data: researchHistory, isLoading } = useQuery<KeywordResearch[]>({
@@ -38,6 +39,30 @@ export default function HistoryPage() {
     onError: (error: any) => {
       toast({
         title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      await Promise.all(ids.map(id => 
+        apiRequest("DELETE", `/api/keyword-research/${id}`)
+      ));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
+      setSelectedIds(new Set());
+      toast({
+        title: "Research Items Deleted",
+        description: `${selectedIds.size} research items removed successfully`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Bulk Delete Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -92,6 +117,33 @@ export default function HistoryPage() {
     e.stopPropagation();
     if (confirm("Are you sure you want to delete this research?")) {
       deleteResearchMutation.mutate(id);
+    }
+  };
+
+  const toggleSelection = (id: number) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === researchHistory?.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(researchHistory?.map(r => r.id) || []));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    
+    const count = selectedIds.size;
+    if (confirm(`Are you sure you want to delete ${count} research item${count > 1 ? 's' : ''}?`)) {
+      bulkDeleteMutation.mutate(Array.from(selectedIds));
     }
   };
 
@@ -409,7 +461,45 @@ export default function HistoryPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6">
+          <div className="space-y-6">
+            {/* Bulk Selection Controls */}
+            <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSelectAll}
+                  className="flex items-center space-x-2"
+                >
+                  {selectedIds.size === researchHistory.length ? 
+                    <CheckSquare size={16} /> : 
+                    <Square size={16} />
+                  }
+                  <span>
+                    {selectedIds.size === researchHistory.length ? 'Deselect All' : 'Select All'}
+                  </span>
+                </Button>
+                {selectedIds.size > 0 && (
+                  <span className="text-sm text-gray-600">
+                    {selectedIds.size} item{selectedIds.size > 1 ? 's' : ''} selected
+                  </span>
+                )}
+              </div>
+              {selectedIds.size > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleteMutation.isPending}
+                  className="flex items-center space-x-2"
+                >
+                  <Trash2 size={16} />
+                  <span>Delete Selected ({selectedIds.size})</span>
+                </Button>
+              )}
+            </div>
+
+            <div className="grid gap-6">
             {researchHistory.map((research) => (
               <Card 
                 key={research.id} 
@@ -419,6 +509,20 @@ export default function HistoryPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelection(research.id);
+                        }}
+                        className="p-1"
+                      >
+                        {selectedIds.has(research.id) ? 
+                          <CheckSquare size={16} className="text-primary" /> : 
+                          <Square size={16} className="text-gray-400" />
+                        }
+                      </Button>
                       <div className="text-2xl">{getIndustryIcon(research.industry)}</div>
                       <div>
                         {editingId === research.id ? (
@@ -553,6 +657,7 @@ export default function HistoryPage() {
                 </CardContent>
               </Card>
             ))}
+            </div>
           </div>
         )}
       </main>
