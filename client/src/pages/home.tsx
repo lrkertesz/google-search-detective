@@ -197,10 +197,12 @@ export default function Home() {
   const handlePaste = (e: React.ClipboardEvent) => {
     const pastedText = e.clipboardData.getData('text');
     if (pastedText.includes(',')) {
-      // Small delay to let the input update, then auto-add cities
+      // Set the input value and then process it
       setTimeout(() => {
-        addCity();
-      }, 100);
+        if (cityInput.includes(',')) {
+          addCity();
+        }
+      }, 50);
     }
   };
 
@@ -387,9 +389,19 @@ export default function Home() {
               Step 2: Target Cities
             </Label>
             <div className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
+                <div className="font-medium text-yellow-800 mb-1">📋 Copy-Paste Workflow:</div>
+                <div className="text-yellow-700">
+                  1. Copy comma-separated city list from your market revenue app<br/>
+                  2. Paste it in the field below<br/>
+                  3. Click "Add Cities" button to process all cities<br/>
+                  4. Verify all cities appear as badges before starting research
+                </div>
+              </div>
+              
               <div className="flex items-center space-x-4">
                 <Input
-                  placeholder="Paste your comma-separated city list from the market revenue app here"
+                  placeholder="Paste your comma-separated city list from the market revenue app here, then click Add Cities"
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -399,9 +411,10 @@ export default function Home() {
                 <Button 
                   onClick={addCity}
                   className="bg-secondary hover:bg-secondary/90"
+                  disabled={!cityInput.trim()}
                 >
                   <Plus size={16} className="mr-2" />
-                  Add City
+                  Add Cities
                 </Button>
               </div>
               
