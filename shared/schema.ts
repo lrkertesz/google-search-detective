@@ -80,6 +80,23 @@ export interface KeywordResult {
   cpc: number;
 }
 
+export interface TAMCalculation {
+  annualSearchVolume: number;
+  fullSystemReplacements: {
+    annualVolume: number;
+    revenue: number;
+  };
+  refrigerantRecharge: {
+    annualVolume: number;
+    revenue: number;
+  };
+  compressorFanReplacements: {
+    annualVolume: number;
+    revenue: number;
+  };
+  totalNewRevenueOpportunity: number;
+}
+
 export interface KeywordData {
   keyword: string;
   volume: number;
