@@ -296,9 +296,9 @@ export default function Home() {
     // Calculate annual search volume (monthly * 12)
     const annualSearchVolume = validKeywords.reduce((sum, k) => sum + k.searchVolume, 0) * 12;
     
-    // HVAC service breakdown based on your methodology:
+    // HVAC service breakdown based on your TAM methodology:
     // Emergency-based searches typically break down into these service categories
-    const fullSystemReplacementsVolume = Math.round(annualSearchVolume * 0.14); // ~14% are full system replacements ($15,000 avg)
+    const fullSystemReplacementsVolume = Math.round(annualSearchVolume * 0.25); // ~25% are full system replacements ($15,000 avg)
     const refrigerantRechargeVolume = Math.round(annualSearchVolume * 0.30); // ~30% are refrigerant issues ($800 avg)  
     const compressorFanVolume = Math.round(annualSearchVolume * 0.03); // ~3% are compressor/fan motor ($850 avg)
     
@@ -605,7 +605,7 @@ export default function Home() {
                         {tamData.fullSystemReplacements.annualVolume.toLocaleString()}
                       </div>
                       <div className="text-sm text-gray-600">Full System Replacements</div>
-                      <div className="text-xs text-gray-500 mt-1">~14% of emergency calls</div>
+                      <div className="text-xs text-gray-500 mt-1">~25% of emergency calls</div>
                     </div>
                     <div className="text-center p-4 bg-white rounded-lg border border-green-200">
                       <div className="text-2xl font-bold text-green-600">
