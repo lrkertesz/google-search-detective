@@ -11,7 +11,6 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
     "Keyword", 
     "Search Volume",
     "CPC ($)",
-    "Competition (%)",
     "PPC Budget Cost ($/mo)"
   ];
 
@@ -22,7 +21,6 @@ export function exportToCSV(data: KeywordResult[], filename: string) {
       `"${row.keyword}"`,
       row.searchVolume,
       row.cpc.toFixed(2),
-      row.competition,
       Math.round(row.searchVolume * row.cpc * 0.30)
     ].join(","))
   ];
@@ -66,7 +64,6 @@ export function exportAllResults(research: {
     "Keyword",
     "Search Volume",
     "CPC ($)",
-    "Competition (%)",
     "PPC Budget Cost ($/mo)"
   ];
 
@@ -77,7 +74,7 @@ export function exportAllResults(research: {
       `"${research.industry}"`,
       `"${research.cities.join(", ")}"`,
       `"${new Date(research.createdAt).toLocaleDateString()}"`,
-      "","","","",""
+      "","","",""
     ].join(","),
     // Add empty row for separation
     "",
@@ -89,7 +86,6 @@ export function exportAllResults(research: {
       `"${row.keyword}"`,
       row.searchVolume,
       row.cpc.toFixed(2),
-      row.competition,
       Math.round(row.searchVolume * row.cpc * 0.30)
     ].join(","))
   ];

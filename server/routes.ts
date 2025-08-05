@@ -388,46 +388,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Always include all keyword combinations, even if no API data
         let searchVolume = 0;
         let cpc = 0;
-        let competition = 0;
-        let opportunity: "High" | "Medium" | "Low" = "Low";
         
         if (data) {
           searchVolume = data.volume;
           cpc = data.cpc;
-          competition = data.volume === 0 ? 0 : data.competition;
-          
-          // Determine opportunity level based on business value
-          const hasGoodVolume = data.volume >= 50;
-          const hasHighVolume = data.volume >= 200;
-          const hasLowCPC = data.cpc <= 5.00;
-          const hasVeryLowCPC = data.cpc <= 2.00;
-          const hasExcellentCPC = data.cpc <= 1.50;
-          const isZeroCPC = data.cpc === 0;
-          
-          if (hasGoodVolume && hasExcellentCPC && !isZeroCPC) {
-            opportunity = "High";
-          } else if (hasHighVolume && hasVeryLowCPC && !isZeroCPC) {
-            opportunity = "High";
-          } else if (hasGoodVolume && hasVeryLowCPC && !isZeroCPC) {
-            opportunity = "High";
-          } else if (hasGoodVolume && hasLowCPC) {
-            opportunity = "Medium";
-          } else if (hasVeryLowCPC && data.volume >= 10 && !isZeroCPC) {
-            opportunity = "Medium";
-          } else if (isZeroCPC && data.volume >= 50) {
-            opportunity = "Medium";
-          } else if (isZeroCPC && data.volume >= 10) {
-            opportunity = "Low";
-          }
         }
         
         // Include ALL keyword combinations in results
         results.push({
           keyword: combination,
           searchVolume: searchVolume,
-          cpc: cpc,
-          competition: competition,
-          opportunity
+          cpc: cpc
         });
       });
       

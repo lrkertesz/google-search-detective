@@ -19,7 +19,7 @@ import type { KeywordResearch, KeywordResult, Industry } from "@shared/schema";
 
 // Industries are now loaded dynamically from the database
 
-type SortField = 'keyword' | 'searchVolume' | 'cpc' | 'competition' | 'opportunity';
+type SortField = 'keyword' | 'searchVolume' | 'cpc';
 type SortDirection = 'asc' | 'desc';
 
 export default function Home() {
@@ -41,7 +41,7 @@ export default function Home() {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
-      setSortDirection(field === 'keyword' || field === 'opportunity' ? 'asc' : 'desc');
+      setSortDirection(field === 'keyword' ? 'asc' : 'desc');
     }
   };
 
@@ -64,14 +64,6 @@ export default function Home() {
         case 'cpc':
           aValue = a.cpc;
           bValue = b.cpc;
-          break;
-        case 'competition':
-          aValue = a.competition;
-          bValue = b.competition;
-          break;
-        case 'opportunity':
-          aValue = a.opportunity.toLowerCase();
-          bValue = b.opportunity.toLowerCase();
           break;
         default:
           return 0;
@@ -294,20 +286,7 @@ export default function Home() {
 
 
 
-  const getOpportunityColor = (opportunity: string) => {
-    switch (opportunity) {
-      case "High": return "bg-green-100 text-green-800";
-      case "Medium": return "bg-yellow-100 text-yellow-800";
-      case "Low": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
-  const getCompetitionColor = (competition: number) => {
-    if (competition <= 30) return "bg-green-400";
-    if (competition <= 60) return "bg-yellow-400";
-    return "bg-red-400";
-  };
 
   return (
     <div className="min-h-screen bg-neutral">
@@ -502,10 +481,10 @@ export default function Home() {
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">
-                      {currentResearch.results.filter(k => k.opportunity === "High").length}
+                      {currentResearch.results.filter(k => k.searchVolume > 50 && k.cpc > 0).length}
                     </div>
-                    <div className="text-sm text-gray-600">Prime Opportunities</div>
-                    <div className="text-xs text-gray-500 mt-1">Ready for immediate action</div>
+                    <div className="text-sm text-gray-600">High-Value Keywords</div>
+                    <div className="text-xs text-gray-500 mt-1">Strong volume with real market value</div>
                   </div>
                   <div className="text-center p-4 bg-orange-50 rounded-lg">
                     <div className="text-2xl font-bold text-orange-600">
@@ -530,7 +509,7 @@ export default function Home() {
                     <div>
                       <strong className="text-indigo-700">Immediate PPC Opportunities:</strong>
                       <p className="text-gray-700">
-                        {currentResearch.results.filter(k => k.opportunity === "High" && k.searchVolume > 50).length} keywords with high search volume and manageable competition for quick market entry.
+                        {currentResearch.results.filter(k => k.searchVolume > 50 && k.cpc > 0).length} keywords with strong search volume and verified market value for quick campaign launch.
                       </p>
                     </div>
                     <div>
@@ -602,22 +581,9 @@ export default function Home() {
                       >
                         CPC
                       </SortableTableHead>
-                      <SortableTableHead 
-                        field="competition" 
-                        currentField={sortField} 
-                        currentDirection={sortDirection} 
-                        onSort={handleSort}
-                      >
-                        Competition
-                      </SortableTableHead>
-                      <SortableTableHead 
-                        field="opportunity" 
-                        currentField={sortField} 
-                        currentDirection={sortDirection} 
-                        onSort={handleSort}
-                      >
-                        PPC Budget Cost *
-                      </SortableTableHead>
+                      <TableHead>
+                        PPC Budget Cost
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -626,23 +592,20 @@ export default function Home() {
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
-                        <TableCell className="font-medium">{keyword.competition}%</TableCell>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center space-x-2">
-                            <Badge 
-                              className={getOpportunityColor(keyword.opportunity)}
-                            >
-                              {keyword.opportunity}
-                            </Badge>
-                            <span className="text-green-600 font-medium">
-                              ${Math.round(keyword.searchVolume * keyword.cpc * 0.30).toLocaleString()}/mo
-                            </span>
-                          </div>
+                        <TableCell className="font-medium text-green-600">
+                          ${Math.round(keyword.searchVolume * keyword.cpc * 0.30).toLocaleString()}/mo
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+              
+              {/* Educational Footnote about Low-Volume Data */}
+              <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <p className="text-sm text-gray-600">
+                  <strong>Note:</strong> Keywords with very low search volume may show $0.00 costs due to limited advertising data. This reflects insufficient market activity for reliable estimates, not actual zero costs for advertising.
+                </p>
               </div>
 
             </Card>
@@ -696,7 +659,6 @@ export default function Home() {
                       </SortableTableHead>
                       <TableHead>Search Volume</TableHead>
                       <TableHead>Content Strategy</TableHead>
-                      <TableHead>SEO Priority</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -708,19 +670,6 @@ export default function Home() {
                         </TableCell>
                         <TableCell>
                           <span className="text-blue-600">Blog Post / Landing Page</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={
-                              keyword.competition <= 30 ? "bg-green-100 text-green-800" :
-                              keyword.competition <= 60 ? "bg-yellow-100 text-yellow-800" :
-                              "bg-red-100 text-red-800"
-                            }
-                          >
-                            {keyword.competition <= 30 ? "High Priority" :
-                             keyword.competition <= 60 ? "Medium Priority" :
-                             "Low Priority"}
-                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))}
