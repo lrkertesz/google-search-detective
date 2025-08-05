@@ -286,7 +286,8 @@ export default function Home() {
 
   // TAM Calculation Function based on your HVAC business model
   const calculateTAM = (keywords: KeywordResult[]): TAMCalculation | null => {
-    if (selectedIndustry !== "hvac" || keywords.length === 0) return null;
+    console.log('TAM Check - selectedIndustry:', selectedIndustry, 'keywords length:', keywords.length);
+    if (!selectedIndustry || selectedIndustry.toLowerCase() !== "hvac" || keywords.length === 0) return null;
     
     // Only consider keywords with search volume > 0 for TAM calculation
     const validKeywords = keywords.filter(k => k.searchVolume > 0);
@@ -327,6 +328,13 @@ export default function Home() {
   };
 
   const tamData = calculateTAM(allKeywords);
+  console.log('TAM Data:', tamData);
+
+  // State for collapsing zero-volume keywords
+  const [showAllZeroVolume, setShowAllZeroVolume] = useState(false);
+  const displayedZeroVolumeKeywords = showAllZeroVolume 
+    ? keywordsWithoutVolume 
+    : keywordsWithoutVolume.slice(0, 15);
 
 
 
@@ -791,7 +799,7 @@ export default function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {keywordsWithoutVolume.map((keyword, index) => (
+                    {displayedZeroVolumeKeywords.map((keyword, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{keyword.keyword}</TableCell>
                         <TableCell>
@@ -805,6 +813,32 @@ export default function Home() {
                   </TableBody>
                 </Table>
               </div>
+              
+              {/* Collapse/Expand Controls */}
+              {keywordsWithoutVolume.length > 15 && (
+                <div className="p-4 border-t border-gray-200 text-center">
+                  <Button
+                    variant="outline" 
+                    onClick={() => setShowAllZeroVolume(!showAllZeroVolume)}
+                    className="flex items-center space-x-2"
+                  >
+                    {showAllZeroVolume ? (
+                      <>
+                        <ChevronUp size={16} />
+                        <span>Show Less (15 keywords)</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={16} />
+                        <span>Show All {keywordsWithoutVolume.length} Keywords</span>
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-sm text-gray-500 mt-2">
+                    {showAllZeroVolume ? `Showing all ${keywordsWithoutVolume.length} keywords` : `Showing 15 of ${keywordsWithoutVolume.length} keywords`}
+                  </div>
+                </div>
+              )}
             </Card>
 
             {/* Combined Export Options */}
