@@ -87,7 +87,7 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       
       // NUCLEAR API IMPLEMENTATION
       const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
-      const BATCH_SIZE = 10; // Smaller batches for testing
+      const BATCH_SIZE = 1000; // Efficient batch size
       const allResults = new Map();
       
       for (let i = 0; i < keywordCombinations.length; i += BATCH_SIZE) {
