@@ -109,13 +109,15 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
           console.log("🌟 API Response status:", response.status);
           console.log("🌟 API Response credits remaining:", data.credits_remaining);
           
-          // Check for unrealistic volumes
+          // CRITICAL: Check for unrealistic volumes that indicate fake data
           if (data.data && data.data.length > 0) {
             const firstItem = data.data[0];
             const volume = firstItem.vol || firstItem.volume || 0;
             if (volume > 5000) {
-              console.log("🚨 WARNING: Unrealistic volume detected:", volume, "for keyword:", firstItem.keyword);
-              console.log("🚨 This suggests mock or cached data, not real KWE API data");
+              console.log("🚨 CRITICAL ERROR: Fake data detected:", volume, "for keyword:", firstItem.keyword);
+              console.log("🚨 Keywords Everywhere API returning unrealistic volumes");
+              console.log("🚨 Real KWE data should be 30-390 searches for small cities");
+              throw new Error("API returning fake data - stopping research to prevent mock data usage");
             }
           }
         }
