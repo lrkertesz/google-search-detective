@@ -1,4 +1,4 @@
-# Keyword Research Tool
+# Google Search Detective
 
 ## Overview
 

@@ -320,7 +320,7 @@ export default function Home() {
                 <Search className="text-white" size={20} />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Keyword Research Pro</h1>
+                <h1 className="text-xl font-semibold text-gray-900">Google Search Detective</h1>
                 <p className="text-sm text-neutral-dark">Local Service Provider Analysis</p>
               </div>
             </div>
