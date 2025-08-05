@@ -72,10 +72,12 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       }
       
       console.log("🌟 Starting nuclear API implementation");
+      console.log("🌟 API Key length:", finalApiKey.length);
+      console.log("🌟 API Key prefix:", finalApiKey.substring(0, 8) + "...");
       
       // NUCLEAR API IMPLEMENTATION
       const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
-      const BATCH_SIZE = 1000;
+      const BATCH_SIZE = 10; // Smaller batches for testing
       const allResults = new Map();
       
       for (let i = 0; i < keywordCombinations.length; i += BATCH_SIZE) {
@@ -104,6 +106,18 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
         
         if (i === 0) {
           console.log("🌟 Raw API response sample:", JSON.stringify(data.data?.slice(0, 3), null, 2));
+          console.log("🌟 API Response status:", response.status);
+          console.log("🌟 API Response credits remaining:", data.credits_remaining);
+          
+          // Check for unrealistic volumes
+          if (data.data && data.data.length > 0) {
+            const firstItem = data.data[0];
+            const volume = firstItem.vol || firstItem.volume || 0;
+            if (volume > 5000) {
+              console.log("🚨 WARNING: Unrealistic volume detected:", volume, "for keyword:", firstItem.keyword);
+              console.log("🚨 This suggests mock or cached data, not real KWE API data");
+            }
+          }
         }
         
         // Transform API response to our format
