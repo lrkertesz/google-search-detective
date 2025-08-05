@@ -704,10 +704,6 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex space-x-3">
-                    <div className="text-sm text-gray-600 flex items-center">
-                      <ArrowDownWideNarrow size={16} className="mr-2" />
-                      Click column headers to sort
-                    </div>
                     <Button 
                       onClick={exportAllReportsHandler}
                       className="bg-primary hover:bg-primary-dark"
@@ -723,6 +719,13 @@ export default function Home() {
                       Export PPC Keywords
                     </Button>
                   </div>
+                </div>
+              </div>
+              
+              <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
+                <div className="text-sm text-gray-600 flex items-center">
+                  <ArrowDownWideNarrow size={16} className="mr-2" />
+                  Click column headers to sort by search volume, CPC, or keyword
                 </div>
               </div>
               
@@ -803,10 +806,6 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex space-x-3">
-                    <div className="text-sm text-gray-600 flex items-center">
-                      <ArrowDownWideNarrow size={16} className="mr-2" />
-                      Click column headers to sort
-                    </div>
                     <Button 
                       onClick={exportAllReportsHandler}
                       className="bg-primary hover:bg-primary-dark"
@@ -822,6 +821,13 @@ export default function Home() {
                       Export SEO Targets
                     </Button>
                   </div>
+                </div>
+              </div>
+              
+              <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
+                <div className="text-sm text-gray-600 flex items-center">
+                  <ArrowDownWideNarrow size={16} className="mr-2" />
+                  Click column headers to sort by keyword
                 </div>
               </div>
               
