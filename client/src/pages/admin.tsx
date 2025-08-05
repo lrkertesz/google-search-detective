@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff, TestTube } from "lucide-react";
+import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff, TestTube, X } from "lucide-react";
 import { Link } from "wouter";
 import type { Industry, Settings as SettingsType } from "@shared/schema";
 
@@ -480,62 +480,6 @@ export default function Admin() {
                           Edit
                         </Button>
                         
-                        <Dialog open={isEditingOpen} onOpenChange={setIsEditingOpen}>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Edit Industry</DialogTitle>
-                              <DialogDescription>
-                                Modify the industry details and update the keyword list.
-                              </DialogDescription>
-                            </DialogHeader>
-                            {editingIndustry && (
-                              <div className="space-y-4">
-                                <div>
-                                  <Label htmlFor="edit-name">Industry Name</Label>
-                                  <Input
-                                    id="edit-name"
-                                    value={editingIndustry.name}
-                                    onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, name: e.target.value } : null)}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-label">Display Label</Label>
-                                  <Input
-                                    id="edit-label"
-                                    value={editingIndustry.label}
-                                    onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, label: e.target.value } : null)}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-keywords">Keywords (one per line)</Label>
-                                  <Textarea
-                                    id="edit-keywords"
-                                    rows={8}
-                                    value={typeof editingIndustry.keywords === 'string' 
-                                      ? editingIndustry.keywords 
-                                      : Array.isArray(editingIndustry.keywords) 
-                                        ? (editingIndustry.keywords as string[]).join('\n')
-                                        : ''
-                                    }
-                                    onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, keywords: e.target.value } : null)}
-                                  />
-                                </div>
-                                <div className="flex justify-end space-x-2">
-                                  <Button variant="outline" onClick={closeEditDialog}>
-                                    Cancel
-                                  </Button>
-                                  <Button 
-                                    onClick={() => handleUpdateIndustry(industry)}
-                                    disabled={updateIndustryMutation.isPending}
-                                  >
-                                    Update Industry
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                        
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
@@ -569,6 +513,75 @@ export default function Admin() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Custom Edit Modal - Avoiding Dialog component to prevent runtime errors */}
+        {isEditingOpen && editingIndustry && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50" 
+              onClick={closeEditDialog}
+            />
+            {/* Modal */}
+            <div className="relative bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Edit Industry</h2>
+                    <p className="text-sm text-gray-500">Modify the industry details and update the keyword list.</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={closeEditDialog}>
+                    <X size={16} />
+                  </Button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit-name">Industry Name</Label>
+                    <Input
+                      id="edit-name"
+                      value={editingIndustry.name}
+                      onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, name: e.target.value } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-label">Display Label</Label>
+                    <Input
+                      id="edit-label"
+                      value={editingIndustry.label}
+                      onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, label: e.target.value } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-keywords">Keywords (one per line)</Label>
+                    <Textarea
+                      id="edit-keywords"
+                      rows={8}
+                      value={editingIndustry.keywords}
+                      onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, keywords: e.target.value } : null)}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2 pt-4 border-t">
+                    <Button variant="outline" onClick={closeEditDialog}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        const currentIndustry = industries?.find(ind => ind.id === editingIndustry.id);
+                        if (currentIndustry) {
+                          handleUpdateIndustry(currentIndustry);
+                        }
+                      }}
+                      disabled={updateIndustryMutation.isPending}
+                    >
+                      {updateIndustryMutation.isPending ? 'Updating...' : 'Update Industry'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
