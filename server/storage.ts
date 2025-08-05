@@ -45,7 +45,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getIndustries(): Promise<Industry[]> {
-    return await db.select().from(industries);
+    const allIndustries = await db.select().from(industries);
+    
+    // Sort industries: HVAC first, Plumbing second, Electrical third, then others alphabetically
+    const priorityOrder = ['hvac', 'plumbing', 'electrical'];
+    
+    return allIndustries.sort((a, b) => {
+      const aIndex = priorityOrder.indexOf(a.name.toLowerCase());
+      const bIndex = priorityOrder.indexOf(b.name.toLowerCase());
+      
+      // If both are in priority list, sort by their position
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      
+      // If only 'a' is in priority list, it comes first
+      if (aIndex !== -1) return -1;
+      
+      // If only 'b' is in priority list, it comes first
+      if (bIndex !== -1) return 1;
+      
+      // If neither is in priority list, sort alphabetically
+      return a.label.localeCompare(b.label);
+    });
   }
 
   async getIndustry(id: number): Promise<Industry | undefined> {
