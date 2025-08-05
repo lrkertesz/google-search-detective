@@ -59,10 +59,22 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       
       // Generate all keyword combinations (city before AND after keyword)
       const keywordCombinations: string[] = [];
+      const keywordSet = new Set<string>(); // Use Set to prevent duplicates
+      
       industryData.keywords.forEach(keyword => {
         cities.forEach(city => {
-          keywordCombinations.push(`${keyword} ${city}`);
-          keywordCombinations.push(`${city} ${keyword}`);
+          const keywordCity = `${keyword} ${city}`;
+          const cityKeyword = `${city} ${keyword}`;
+          
+          // Only add if not already in set
+          if (!keywordSet.has(keywordCity)) {
+            keywordSet.add(keywordCity);
+            keywordCombinations.push(keywordCity);
+          }
+          if (!keywordSet.has(cityKeyword)) {
+            keywordSet.add(cityKeyword);
+            keywordCombinations.push(cityKeyword);
+          }
         });
       });
       
