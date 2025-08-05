@@ -170,6 +170,8 @@ async function testApiKey(apiKey: string): Promise<{ valid: boolean; message: st
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log("🚨 ROUTES FILE EXECUTING - TIMESTAMP:", new Date().toISOString());
+  console.log("🚨 FILE PATH:", import.meta.url || __filename || "unknown");
   
   // Admin/Settings routes
   
@@ -328,8 +330,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Start keyword research
+  // Start keyword research  
   app.post("/api/keyword-research", async (req, res) => {
+    console.log("🆘🆘🆘 ROUTE HIT - TOP OF FUNCTION:", new Date().toISOString());
+    console.log("🆘 Request received for:", JSON.stringify(req.body));
+    
     try {
       const validatedData = keywordSearchRequestSchema.parse(req.body);
       const { industry, cities } = validatedData;
@@ -379,6 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         console.log("🔑 Using Keywords Everywhere API for", keywordCombinations.length, "keywords");
         console.log("📋 First 10 keywords being sent to API:", keywordCombinations.slice(0, 10));
+        console.log("🔍 TIMESTAMP CHECK: Function executing at", new Date().toISOString());
         
         // NUCLEAR OPTION: Complete inline API implementation to bypass broken function
         console.log("💥 NUCLEAR FIX: Implementing complete inline API call");
