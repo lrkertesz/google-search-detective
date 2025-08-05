@@ -337,7 +337,7 @@ export default function HistoryPage() {
                   <tbody>
                     {selectedResearch.results.filter(k => k.searchVolume > 0).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
+                        <td className="py-3 px-4 text-sm">{result.keyword}</td>
                         <td className="py-3 px-4 text-right">{result.searchVolume.toLocaleString()}/mo</td>
                         <td className="py-3 px-4 text-right">${result.cpc.toFixed(2)}</td>
                         <td className="py-3 px-4 text-right text-green-600">
@@ -380,7 +380,7 @@ export default function HistoryPage() {
                   <tbody>
                     {selectedResearch.results.filter(k => k.searchVolume === 0).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
+                        <td className="py-3 px-4 text-sm">{result.keyword}</td>
                         <td className="py-3 px-4 text-center">
                           <span className="text-gray-600">0</span>
                         </td>

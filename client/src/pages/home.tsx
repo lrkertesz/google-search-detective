@@ -706,7 +706,7 @@ export default function Home() {
                   <div className="flex space-x-3">
                     <Button 
                       onClick={exportAllReportsHandler}
-                      className="bg-primary hover:bg-primary-dark"
+                      className="bg-green-600 hover:bg-green-700"
                     >
                       <Download size={16} className="mr-2" />
                       Download All Reports ({selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files)
@@ -765,7 +765,7 @@ export default function Home() {
                   <TableBody>
                     {sortKeywords(keywordsWithVolume, sortField, sortDirection).map((keyword, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{keyword.keyword}</TableCell>
+                        <TableCell className="">{keyword.keyword}</TableCell>
                         <TableCell className="font-medium">{keyword.searchVolume.toLocaleString()}/mo</TableCell>
                         <TableCell className="font-medium">${keyword.cpc.toFixed(2)}</TableCell>
                         <TableCell className="font-medium text-green-600">
@@ -808,7 +808,7 @@ export default function Home() {
                   <div className="flex space-x-3">
                     <Button 
                       onClick={exportAllReportsHandler}
-                      className="bg-primary hover:bg-primary-dark"
+                      className="bg-green-600 hover:bg-green-700"
                     >
                       <Download size={16} className="mr-2" />
                       Download All Reports ({selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files)
@@ -850,7 +850,7 @@ export default function Home() {
                   <TableBody>
                     {displayedZeroVolumeKeywords.map((keyword, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{keyword.keyword}</TableCell>
+                        <TableCell className="">{keyword.keyword}</TableCell>
                         <TableCell>
                           <span className="text-gray-600">0</span>
                         </TableCell>
