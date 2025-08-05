@@ -178,7 +178,7 @@ export default function HistoryPage() {
   };
 
   const exportCSVWithoutVolume = (research: KeywordResearch) => {
-    const keywordsWithoutVolume = research.results.filter(k => k.searchVolume <= 0 || k.searchVolume === null || k.searchVolume === undefined);
+    const keywordsWithoutVolume = research.results.filter(k => k.searchVolume === 0);
     exportToCSV(keywordsWithoutVolume, `keywords-seo-${research.industry}-${Date.now()}.csv`);
   };
 
