@@ -8,6 +8,8 @@ import { z } from "zod";
 async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Promise<Map<string, any>> {
   const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
   
+  console.log("🚀 ENHANCED API FUNCTION EXECUTING - NEW CODE PATH");
+  
   // Keywords Everywhere API has a limit - batch in chunks of 1000
   const BATCH_SIZE = 1000;
   const allResults = new Map();
@@ -377,6 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         console.log("🔑 Using Keywords Everywhere API for", keywordCombinations.length, "keywords");
         console.log("📋 First 10 keywords being sent to API:", keywordCombinations.slice(0, 10));
+        console.log("🔥 CALLING fetchKeywordDataFromAPI NOW...");
         keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
         console.log("✅ API data retrieved successfully");
         console.log("📊 API returned data for", keywordData.size, "keywords");
