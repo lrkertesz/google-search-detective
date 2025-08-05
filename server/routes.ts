@@ -347,8 +347,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Industry not found" });
       }
       
-      // Generate all keyword combinations (city before AND after keyword)
+      // Generate keyword combinations: geo-targeted AND general industry terms
       const keywordCombinations: string[] = [];
+      
+      // Add base keywords without cities (for broad industry terms)
+      industryData.keywords.forEach(keyword => {
+        keywordCombinations.push(keyword);
+      });
+      
+      // Add geo-targeted combinations (city before AND after keyword)
       industryData.keywords.forEach(keyword => {
         cities.forEach(city => {
           // Add city after keyword: "HVAC repair Miami"
