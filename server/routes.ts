@@ -4,11 +4,11 @@ import { storage } from "./storage";
 import { keywordSearchRequestSchema, insertIndustrySchema, insertSettingsSchema, updateKeywordResearchSchema, type KeywordResult, type Industry } from "@shared/schema";
 import { z } from "zod";
 
-// Keywords Everywhere API integration
-async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Promise<Map<string, any>> {
+// Keywords Everywhere API integration - COMPLETELY NEW FUNCTION  
+async function fetchKeywordDataFromAPIEnhanced(keywords: string[], apiKey: string): Promise<Map<string, any>> {
   const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
   
-  console.log("🚀 ENHANCED API FUNCTION EXECUTING - NEW CODE PATH");
+  console.log("🚀🚀🚀 FIXED ENHANCED API FUNCTION EXECUTING - CACHE BYPASSED 🚀🚀🚀");
   
   // Keywords Everywhere API has a limit - batch in chunks of 1000
   const BATCH_SIZE = 1000;
@@ -379,9 +379,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         console.log("🔑 Using Keywords Everywhere API for", keywordCombinations.length, "keywords");
         console.log("📋 First 10 keywords being sent to API:", keywordCombinations.slice(0, 10));
-        console.log("🔥 CALLING fetchKeywordDataFromAPI NOW...");
-        keywordData = await fetchKeywordDataFromAPI(keywordCombinations, finalApiKey);
-        console.log("✅ API data retrieved successfully");
+        
+        // NUCLEAR OPTION: Complete inline API implementation to bypass broken function
+        console.log("💥 NUCLEAR FIX: Implementing complete inline API call");
+        
+        const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
+        const BATCH_SIZE = 1000;
+        const allResults = new Map();
+        
+        for (let i = 0; i < keywordCombinations.length; i += BATCH_SIZE) {
+          const batch = keywordCombinations.slice(i, i + BATCH_SIZE);
+          console.log(`💥 Processing batch ${Math.floor(i/BATCH_SIZE) + 1} of ${Math.ceil(keywordCombinations.length/BATCH_SIZE)} (${batch.length} keywords)`);
+          
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${finalApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              country: "US",
+              currency: "USD",
+              dataSource: "gkp",
+              kw: batch,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`API request failed: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          
+          if (i === 0) {
+            console.log("💥 Raw API response sample (first batch):", JSON.stringify(data.data?.slice(0, 3), null, 2));
+          }
+          
+          // Transform API response to our format
+          if (data.data && Array.isArray(data.data)) {
+            data.data.forEach((item: any) => {
+              const volume = item.vol || item.volume || 0;
+              
+              // Handle CPC - it might be a number or an object with currency/value
+              let cpc = 0;
+              if (typeof item.cpc === 'number') {
+                cpc = item.cpc;
+              } else if (item.cpc && typeof item.cpc === 'object' && item.cpc.value !== undefined) {
+                cpc = parseFloat(item.cpc.value) || 0;
+              }
+              
+              // Handle competition - convert from 0-1 scale to percentage if needed
+              let competition = volume === 0 ? 0 : (item.competition || 0);
+              if (competition > 0 && competition <= 1) {
+                competition = Math.round(competition * 100); // Convert to percentage
+              }
+              
+              allResults.set(item.keyword, {
+                volume: volume,
+                cpc: cpc,
+                competition: competition,
+              });
+              
+              // Log keywords with actual volume for debugging
+              if (volume > 0 && allResults.size <= 10) {
+                console.log(`💥 FOUND VOLUME: "${item.keyword}" -> ${volume} searches, $${cpc} CPC`);
+              }
+            });
+          }
+          
+          // Small delay between batches to be API-friendly
+          if (i + BATCH_SIZE < keywordCombinations.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        keywordData = allResults;
+        console.log("💥 Nuclear API implementation complete");
         console.log("📊 API returned data for", keywordData.size, "keywords");
       } catch (error) {
         console.error("❌ Keywords Everywhere API failed:", error);
