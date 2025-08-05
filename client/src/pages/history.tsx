@@ -403,13 +403,13 @@ export default function HistoryPage() {
                           <Badge 
                             variant="secondary"
                             className={
-                              result.competition <= 30 ? "bg-green-100 text-green-800" :
-                              result.competition <= 60 ? "bg-yellow-100 text-yellow-800" :
+                              (result.competition || 0) <= 30 ? "bg-green-100 text-green-800" :
+                              (result.competition || 0) <= 60 ? "bg-yellow-100 text-yellow-800" :
                               "bg-red-100 text-red-800"
                             }
                           >
-                            {result.competition <= 30 ? "High Priority" :
-                             result.competition <= 60 ? "Medium Priority" :
+                            {(result.competition || 0) <= 30 ? "High Priority" :
+                             (result.competition || 0) <= 60 ? "Medium Priority" :
                              "Low Priority"}
                           </Badge>
                         </td>

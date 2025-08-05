@@ -83,11 +83,7 @@ export class DatabaseStorage implements IStorage {
   async createIndustry(insertIndustry: InsertIndustry): Promise<Industry> {
     const [industry] = await db
       .insert(industries)
-      .values({
-        name: insertIndustry.name,
-        label: insertIndustry.label,
-        keywords: insertIndustry.keywords
-      })
+      .values(insertIndustry as any)
       .returning();
     return industry;
   }
@@ -152,7 +148,7 @@ export class DatabaseStorage implements IStorage {
   async createKeywordResearch(insertResearch: InsertKeywordResearch): Promise<KeywordResearch> {
     const [research] = await db
       .insert(keywordResearches)
-      .values(insertResearch)
+      .values(insertResearch as any)
       .returning();
     return research;
   }

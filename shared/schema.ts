@@ -78,6 +78,8 @@ export interface KeywordResult {
   keyword: string; // Full keyword phrase including city
   searchVolume: number;
   cpc: number;
+  competition?: number; // Competition score from API
+  opportunity?: string; // Calculated opportunity level: High/Medium/Low
 }
 
 export interface TAMCalculation {
