@@ -234,10 +234,24 @@ export default function Admin() {
   };
 
   const openEditDialog = (industry: Industry) => {
-    setEditingIndustry({
-      ...industry,
-      keywords: industry.keywords.join('\n')
-    });
+    try {
+      console.log('Opening edit dialog for industry:', industry);
+      setEditingIndustry({
+        ...industry,
+        keywords: Array.isArray(industry.keywords) 
+          ? industry.keywords.join('\n')
+          : typeof industry.keywords === 'string'
+            ? industry.keywords
+            : ''
+      });
+    } catch (error) {
+      console.error('Error opening edit dialog:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open edit dialog",
+        variant: "destructive",
+      });
+    }
   };
 
   if (industriesLoading || settingsLoading) {
