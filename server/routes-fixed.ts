@@ -147,10 +147,22 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
           }
         }
         
+        // DIAGNOSTIC LOGGING - Track every keyword with volume
+        console.log(`📊 BATCH ${batchNumber} DIAGNOSTIC - Processing ${data.data?.length || 0} API responses`);
+        
         // Transform API response to our format
         if (data.data && Array.isArray(data.data)) {
-          data.data.forEach((item: any) => {
-            const volume = item.vol || item.volume || 0;
+          let batchVolumeCount = 0;
+          let batchZeroCount = 0;
+          
+          data.data.forEach((item: any, index: number) => {
+            const rawVolume = item.vol || item.volume || 0;
+            const volume = rawVolume;
+            
+            // DIAGNOSTIC: Log first 10 items from each batch
+            if (index < 10) {
+              console.log(`🔍 RAW API ITEM ${index + 1}: keyword="${item.keyword}", vol=${item.vol}, volume=${item.volume}, finalVolume=${volume}`);
+            }
             
             let cpc = 0;
             if (typeof item.cpc === 'number') {
@@ -164,17 +176,30 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
               competition = Math.round(competition * 100);
             }
             
-            allResults.set(item.keyword, {
+            const processedResult = {
               volume: volume,
               cpc: cpc,
               competition: competition,
-            });
+            };
             
-            // Log keywords with actual volume
-            if (volume > 0 && allResults.size <= 10) {
-              console.log(`🌟 FOUND VOLUME: "${item.keyword}" -> ${volume} searches, $${cpc} CPC`);
+            allResults.set(item.keyword, processedResult);
+            
+            // Count volume vs zero for diagnostics
+            if (volume > 0) {
+              batchVolumeCount++;
+              // Log all keywords with volume for comparison
+              console.log(`✅ VOLUME FOUND: "${item.keyword}" -> ${volume} searches, $${cpc} CPC`);
+            } else {
+              batchZeroCount++;
+            }
+            
+            // DIAGNOSTIC: Log data transformation
+            if (index < 5) {
+              console.log(`🔄 TRANSFORMATION: "${item.keyword}" -> STORED: ${JSON.stringify(processedResult)}`);
             }
           });
+          
+          console.log(`📊 BATCH ${batchNumber} SUMMARY: ${batchVolumeCount} with volume, ${batchZeroCount} zero volume`);
         }
         
         // Comfortable delay between batches
