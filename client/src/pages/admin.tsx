@@ -235,25 +235,32 @@ export default function Admin() {
   };
 
   const openEditDialog = (industry: Industry) => {
-    try {
-      console.log('Opening edit dialog for industry:', industry);
-      setEditingIndustry({
-        ...industry,
-        keywords: Array.isArray(industry.keywords) 
-          ? industry.keywords.join('\n')
-          : typeof industry.keywords === 'string'
-            ? industry.keywords
-            : ''
-      });
-      setIsEditingOpen(true);
-    } catch (error) {
-      console.error('Error opening edit dialog:', error);
-      toast({
-        title: "Error",
-        description: "Failed to open edit dialog",
-        variant: "destructive",
-      });
+    console.log('Opening edit dialog for industry:', industry);
+    
+    // Ensure we have valid data before proceeding
+    if (!industry || !industry.id) {
+      console.error('Invalid industry data:', industry);
+      return;
     }
+    
+    // Prepare keywords data safely
+    let keywordsString = '';
+    if (Array.isArray(industry.keywords)) {
+      keywordsString = industry.keywords.join('\n');
+    } else if (typeof industry.keywords === 'string') {
+      keywordsString = industry.keywords;
+    }
+    
+    // Set the editing state
+    setEditingIndustry({
+      id: industry.id,
+      name: industry.name || '',
+      label: industry.label || '',
+      keywords: keywordsString
+    });
+    
+    // Open the dialog
+    setIsEditingOpen(true);
   };
 
   const closeEditDialog = () => {
@@ -464,17 +471,16 @@ export default function Admin() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openEditDialog(industry)}
+                        >
+                          <Edit size={14} className="mr-1" />
+                          Edit
+                        </Button>
+                        
                         <Dialog open={isEditingOpen} onOpenChange={setIsEditingOpen}>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => openEditDialog(industry)}
-                            >
-                              <Edit size={14} className="mr-1" />
-                              Edit
-                            </Button>
-                          </DialogTrigger>
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
                               <DialogTitle>Edit Industry</DialogTitle>
