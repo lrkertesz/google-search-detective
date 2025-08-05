@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X, CheckSquare, Square } from "lucide-react";
+import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X, CheckSquare, Square, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ export default function HistoryPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showZeroVolumeKeywords, setShowZeroVolumeKeywords] = useState<boolean>(false);
 
   // Get research history
   const { data: researchHistory, isLoading } = useQuery<KeywordResearch[]>({
@@ -356,8 +357,27 @@ export default function HistoryPage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Zero Volume Keywords - SEO Content Targets ({selectedResearch.results.filter(k => k.searchVolume === 0).length} keywords)</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowZeroVolumeKeywords(!showZeroVolumeKeywords)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  {showZeroVolumeKeywords ? (
+                    <>
+                      <ChevronUp size={16} />
+                      <span className="ml-1 text-sm">Hide</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown size={16} />
+                      <span className="ml-1 text-sm">Show</span>
+                    </>
+                  )}
+                </Button>
               </CardTitle>
             </CardHeader>
+            {showZeroVolumeKeywords && (
             <CardContent>
               <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
                 <div className="font-medium text-blue-800 mb-2">📊 Search Volume Disclaimer:</div>
@@ -393,6 +413,7 @@ export default function HistoryPage() {
                 </table>
               </div>
             </CardContent>
+            )}
           </Card>
         </main>
       </div>
