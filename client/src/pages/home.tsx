@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useToast } from "@/hooks/use-toast";
-import { exportToCSV } from "@/lib/csvExport";
+import { exportToCSV, exportHVACTAMReport } from "@/lib/csvExport";
 import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import type { KeywordResearch, KeywordResult, Industry, TAMCalculation } from "@shared/schema";
@@ -282,6 +282,12 @@ export default function Home() {
 
   const exportCSVComplete = () => {
     exportToCSV(allKeywords, `keywords-complete-${Date.now()}.csv`);
+  };
+
+  const exportTAMReport = () => {
+    if (currentResearch && tamData) {
+      exportHVACTAMReport(currentResearch, tamData);
+    }
   };
 
   // TAM Calculation Function based on your HVAC business model
@@ -654,6 +660,19 @@ export default function Home() {
                     <div className="text-lg font-medium">Total Addressable Market (TAM)</div>
                     <div className="text-sm opacity-90 mt-1">
                       Annual revenue opportunity available through Google search marketing
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 text-center">
+                    <Button
+                      onClick={exportTAMReport}
+                      className="bg-green-700 hover:bg-green-800 text-white"
+                    >
+                      <Download size={16} className="mr-2" />
+                      Export Complete TAM Report
+                    </Button>
+                    <div className="text-xs text-green-100 mt-1">
+                      Includes TAM analysis, methodology, and keyword data
                     </div>
                   </div>
                 </div>

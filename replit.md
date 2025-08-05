@@ -13,6 +13,9 @@ This keyword research tool is designed to work alongside:
 
 Together, these tools provide complete market entry analysis for service businesses.
 
+**TAM Calculator Integration (Added January 2025):**
+The application now includes a sophisticated Total Addressable Market calculator specifically for HVAC industry searches. This feature transforms raw keyword data into actionable business intelligence by calculating realistic revenue opportunities available through PPC advertising campaigns. The TAM methodology accounts for the 30% of HVAC customers who have annual maintenance contracts and won't search Google for emergency services.
+
 ## User Preferences
 
 **CRITICAL REQUIREMENTS:**
