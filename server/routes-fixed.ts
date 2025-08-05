@@ -29,6 +29,16 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get industries for the main UI
+  app.get("/api/admin/industries", async (req, res) => {
+    try {
+      const industries = await storage.getIndustries();
+      res.json(industries);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Nuclear fix keyword research route
   app.post("/api/keyword-research", async (req, res) => {
     console.log("🌟🌟🌟 NUCLEAR FIX ROUTE EXECUTING:", new Date().toISOString());
