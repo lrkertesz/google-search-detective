@@ -8,80 +8,99 @@ import { z } from "zod";
 async function fetchKeywordDataFromAPI(keywords: string[], apiKey: string): Promise<Map<string, any>> {
   const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
   
+  // Keywords Everywhere API has a limit - batch in chunks of 1000
+  const BATCH_SIZE = 1000;
+  const allResults = new Map();
+  
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        country: "US",
-        currency: "USD",
-        dataSource: "gkp",
-        kw: keywords,
-      }),
-    });
+    for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
+      const batch = keywords.slice(i, i + BATCH_SIZE);
+      console.log(`📦 Processing batch ${Math.floor(i/BATCH_SIZE) + 1} of ${Math.ceil(keywords.length/BATCH_SIZE)} (${batch.length} keywords)`);
+      
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          country: "US",
+          currency: "USD",
+          dataSource: "gkp",
+          kw: batch,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (i === 0) {
+        console.log("📊 Raw API response sample (first batch):", JSON.stringify(data.data?.slice(0, 3), null, 2));
+      }
+      
+      // Transform API response to our format
+      if (data.data && Array.isArray(data.data)) {
+        data.data.forEach((item: any) => {
+          const volume = item.vol || item.volume || 0;
+          
+          // Handle CPC - it might be a number or an object with currency/value
+          let cpc = 0;
+          if (typeof item.cpc === 'number') {
+            cpc = item.cpc;
+          } else if (item.cpc && typeof item.cpc === 'object' && item.cpc.value !== undefined) {
+            cpc = parseFloat(item.cpc.value) || 0;
+          }
+          
+          // Handle competition - convert from 0-1 scale to percentage if needed
+          let competition = volume === 0 ? 0 : (item.competition || 0);
+          if (competition > 0 && competition <= 1) {
+            competition = Math.round(competition * 100); // Convert to percentage
+          }
+          
+          allResults.set(item.keyword, {
+            volume: volume,
+            cpc: cpc,
+            competition: competition,
+          });
+          
+          // Log keywords with actual volume for debugging
+          if (volume > 0 && allResults.size <= 10) {
+            console.log(`✅ FOUND VOLUME: "${item.keyword}" -> ${volume} searches, $${cpc} CPC`);
+          }
+        });
+      }
+      
+      // Small delay between batches to be API-friendly
+      if (i + BATCH_SIZE < keywords.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    // Final debug summary
+    console.log("🔍 Total keywords sent to API:", keywords.length);
+    console.log("📊 Total keywords returned by API:", allResults.size);
+    
+    // Count keywords with actual volume
+    const withVolume = Array.from(allResults.values()).filter(item => item.volume > 0);
+    console.log(`🎯 Keywords with search volume > 0: ${withVolume.length}`);
+    
+    if (withVolume.length > 0) {
+      // Show top keywords by volume
+      const topKeywords = Array.from(allResults.entries())
+        .filter(([_, data]) => data.volume > 0)
+        .sort((a, b) => b[1].volume - a[1].volume)
+        .slice(0, 5);
+      
+      console.log("🏆 Top keywords with volume:");
+      topKeywords.forEach(([keyword, data]) => {
+        console.log(`   "${keyword}": ${data.volume} searches, $${data.cpc} CPC`);
+      });
     }
 
-    const data = await response.json();
-    const results = new Map();
-    
-    console.log("📊 Raw API response sample:", JSON.stringify(data.data?.slice(0, 3), null, 2));
-    
-    // Transform API response to our format
-    data.data.forEach((item: any) => {
-      const volume = item.vol || item.volume || 0;
-      
-      // Handle CPC - it might be a number or an object with currency/value
-      let cpc = 0;
-      if (typeof item.cpc === 'number') {
-        cpc = item.cpc;
-      } else if (item.cpc && typeof item.cpc === 'object' && item.cpc.value !== undefined) {
-        cpc = parseFloat(item.cpc.value) || 0;
-      }
-      
-      // Handle competition - convert from 0-1 scale to percentage if needed
-      let competition = volume === 0 ? 0 : (item.competition || 0);
-      if (competition > 0 && competition <= 1) {
-        competition = Math.round(competition * 100); // Convert to percentage
-      }
-      
-      results.set(item.keyword, {
-        volume: volume,
-        cpc: cpc,
-        competition: competition,
-      });
-      
-      // Log first few entries for debugging
-      if (results.size <= 3) {
-        console.log(`🔍 Keyword: "${item.keyword}" -> Volume: ${volume}, CPC: ${cpc}, Competition: ${competition}%`);
-      }
-    });
-
-    // Debug: Show what keywords API actually returned vs what we sent
-    console.log("🔍 Total keywords sent to API:", keywords.length);
-    console.log("📊 Total keywords returned by API:", results.size);
-    console.log("📋 Sample API returned keywords:", Array.from(results.keys()).slice(0, 8));
-    
-    // Check specifically for city-before vs city-after patterns in API response
-    const returnedKeywords = Array.from(results.keys());
-    const sentCityBefore = keywords.filter(k => /^[A-Z][a-zA-Z\s]+ [a-z]/.test(k));
-    const sentCityAfter = keywords.filter(k => /[a-z] [A-Z][a-zA-Z\s]+$/.test(k));
-    const returnedCityBefore = returnedKeywords.filter(k => /^[A-Z][a-zA-Z\s]+ [a-z]/.test(k));
-    const returnedCityAfter = returnedKeywords.filter(k => /[a-z] [A-Z][a-zA-Z\s]+$/.test(k));
-    
-    console.log(`📤 SENT: ${sentCityBefore.length} city-before, ${sentCityAfter.length} city-after`);
-    console.log(`📥 RECEIVED: ${returnedCityBefore.length} city-before, ${returnedCityAfter.length} city-after`);
-    console.log("📋 Sample city-before sent:", sentCityBefore.slice(0, 3));
-    console.log("📋 Sample city-before received:", returnedCityBefore.slice(0, 3));
-    
-
-
-    return results;
+    return allResults;
   } catch (error) {
     console.error("Keywords Everywhere API error:", error);
     throw error;
