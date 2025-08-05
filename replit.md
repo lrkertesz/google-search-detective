@@ -19,6 +19,9 @@ The application now includes a sophisticated Total Addressable Market calculator
 **Keyword Research Strategy Enhancement (January 2025):**
 Enhanced keyword generation to capture both geo-targeted and general industry terms. Research now includes base keywords without city modifiers to capture broad industry search volume (like "thermal air conditioning" with 480 searches), alongside traditional geo-targeted combinations. This dual approach maximizes data capture from Keywords Everywhere API and provides comprehensive market coverage.
 
+**HVAC Keyword List Expansion (January 2025):**
+Added 14 high-value keyword phrases to HVAC industry list based on bulk Keywords Everywhere analysis and market research. Key additions include "thermal air conditioning" (480 search volume), "commercial hvac", "hvac financing", and other specialized terms that target specific technology segments and customer needs not covered by the original 85 keywords.
+
 ## User Preferences
 
 **CRITICAL REQUIREMENTS:**
