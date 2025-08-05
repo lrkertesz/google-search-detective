@@ -709,6 +709,13 @@ export default function Home() {
                       Click column headers to sort
                     </div>
                     <Button 
+                      onClick={exportAllReportsHandler}
+                      className="bg-primary hover:bg-primary-dark"
+                    >
+                      <Download size={16} className="mr-2" />
+                      Download All Reports ({selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files)
+                    </Button>
+                    <Button 
                       onClick={exportCSVWithVolume}
                       className="bg-green-600 hover:bg-green-700"
                     >
@@ -800,6 +807,13 @@ export default function Home() {
                       <ArrowDownWideNarrow size={16} className="mr-2" />
                       Click column headers to sort
                     </div>
+                    <Button 
+                      onClick={exportAllReportsHandler}
+                      className="bg-primary hover:bg-primary-dark"
+                    >
+                      <Download size={16} className="mr-2" />
+                      Download All Reports ({selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files)
+                    </Button>
                     <Button 
                       onClick={exportCSVWithoutVolume}
                       className="bg-amber-600 hover:bg-amber-700"
