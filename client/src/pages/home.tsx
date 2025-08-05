@@ -268,9 +268,9 @@ export default function Home() {
 
   const allKeywords = currentResearch?.results || [];
   
-  // Separate keywords by search volume
+  // Separate keywords by search volume (handle potential floating point precision issues)
   const keywordsWithVolume = allKeywords.filter(k => k.searchVolume > 0);
-  const keywordsWithoutVolume = allKeywords.filter(k => k.searchVolume === 0);
+  const keywordsWithoutVolume = allKeywords.filter(k => k.searchVolume <= 0 || k.searchVolume === null || k.searchVolume === undefined);
 
   const exportCSVWithVolume = () => {
     exportToCSV(keywordsWithVolume, `keywords-with-volume-${Date.now()}.csv`);
