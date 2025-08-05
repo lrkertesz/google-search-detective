@@ -484,7 +484,12 @@ export default function Admin() {
                                   <Textarea
                                     id="edit-keywords"
                                     rows={8}
-                                    value={editingIndustry.keywords as string}
+                                    value={typeof editingIndustry.keywords === 'string' 
+                                      ? editingIndustry.keywords 
+                                      : Array.isArray(editingIndustry.keywords) 
+                                        ? (editingIndustry.keywords as string[]).join('\n')
+                                        : ''
+                                    }
                                     onChange={(e) => setEditingIndustry(prev => prev ? { ...prev, keywords: e.target.value } : null)}
                                   />
                                 </div>
