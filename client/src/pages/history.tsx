@@ -308,9 +308,9 @@ export default function HistoryPage() {
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
-                    {selectedResearch.results.filter(k => k.opportunity === "High").length}
+                    {selectedResearch.results.filter(k => k.searchVolume > 0 && k.cpc > 0).length}
                   </div>
-                  <div className="text-sm text-gray-600">High Opportunity</div>
+                  <div className="text-sm text-gray-600">Keywords with CPC Data</div>
                 </div>
               </div>
             </CardContent>
@@ -330,29 +330,18 @@ export default function HistoryPage() {
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium text-gray-700">Keyword</th>
                       <th className="text-right py-3 px-4 font-medium text-gray-700">Search Volume</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-700">CPC</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-700">Competition</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-700">Opportunity</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700">CPC ($)</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700">PPC Budget Cost ($/mo)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedResearch.results.filter(k => k.searchVolume > 0).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4 font-mono text-sm">{result.keyword}</td>
-                        <td className="py-3 px-4 text-right">{result.searchVolume.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right">{result.searchVolume.toLocaleString()}/mo</td>
                         <td className="py-3 px-4 text-right">${result.cpc.toFixed(2)}</td>
-                        <td className="py-3 px-4 text-right">{result.competition}%</td>
-                        <td className="py-3 px-4 text-center">
-                          <Badge 
-                            variant="secondary" 
-                            className={
-                              result.opportunity === "High" ? "bg-green-100 text-green-800" :
-                              result.opportunity === "Medium" ? "bg-yellow-100 text-yellow-800" :
-                              "bg-gray-100 text-gray-800"
-                            }
-                          >
-                            {result.opportunity}
-                          </Badge>
+                        <td className="py-3 px-4 text-right text-green-600">
+                          ${Math.round(result.searchVolume * result.cpc * 0.30).toLocaleString()}/mo
                         </td>
                       </tr>
                     ))}
@@ -386,7 +375,6 @@ export default function HistoryPage() {
                       <th className="text-left py-3 px-4 font-medium text-gray-700">Keyword</th>
                       <th className="text-center py-3 px-4 font-medium text-gray-700">Search Volume</th>
                       <th className="text-center py-3 px-4 font-medium text-gray-700">Content Strategy</th>
-                      <th className="text-center py-3 px-4 font-medium text-gray-700">SEO Priority</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -398,20 +386,6 @@ export default function HistoryPage() {
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className="text-blue-600">Blog Post / Landing Page</span>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <Badge 
-                            variant="secondary"
-                            className={
-                              (result.competition || 0) <= 30 ? "bg-green-100 text-green-800" :
-                              (result.competition || 0) <= 60 ? "bg-yellow-100 text-yellow-800" :
-                              "bg-red-100 text-red-800"
-                            }
-                          >
-                            {(result.competition || 0) <= 30 ? "High Priority" :
-                             (result.competition || 0) <= 60 ? "Medium Priority" :
-                             "Low Priority"}
-                          </Badge>
                         </td>
                       </tr>
                     ))}
