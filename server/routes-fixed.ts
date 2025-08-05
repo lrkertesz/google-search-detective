@@ -87,12 +87,15 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       
       // NUCLEAR API IMPLEMENTATION
       const API_URL = "https://api.keywordseverywhere.com/v1/get_keyword_data";
-      const BATCH_SIZE = 1000; // Efficient batch size
+      const BATCH_SIZE = 250; // Optimal batch size
       const allResults = new Map();
       
       for (let i = 0; i < keywordCombinations.length; i += BATCH_SIZE) {
         const batch = keywordCombinations.slice(i, i + BATCH_SIZE);
-        console.log(`🌟 Processing batch ${Math.floor(i/BATCH_SIZE) + 1} of ${Math.ceil(keywordCombinations.length/BATCH_SIZE)} (${batch.length} keywords)`);
+        const batchNumber = Math.floor(i/BATCH_SIZE) + 1;
+        const totalBatches = Math.ceil(keywordCombinations.length/BATCH_SIZE);
+        
+        console.log(`🌟 Processing batch ${batchNumber} of ${totalBatches} (${batch.length} keywords)`);
         
         const response = await fetch(API_URL, {
           method: "POST",
@@ -162,9 +165,9 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
           });
         }
         
-        // Small delay between batches
+        // Comfortable delay between batches
         if (i + BATCH_SIZE < keywordCombinations.length) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
       

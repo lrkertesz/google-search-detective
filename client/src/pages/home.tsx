@@ -232,30 +232,30 @@ export default function Home() {
     setProcessingProgress(0);
     setCurrentKeyword("");
 
-    // Simulate progress (now includes both before and after variations)
+    // Simulate progress with batch processing display
     const totalKeywords = (industryData?.keywords?.length || 0) * cities.length * 2; // x2 for before/after variations
+    const batchSize = 250;
+    const totalBatches = Math.ceil(totalKeywords / batchSize);
+    let currentBatch = 0;
     let processed = 0;
+    
     const interval = setInterval(() => {
-      processed++;
-      setProcessingProgress((processed / totalKeywords) * 100);
-      if (industryData?.keywords && cities.length > 0) {
-        const keywordIndex = Math.floor((processed - 1) / 2) % industryData.keywords.length;
-        const cityIndex = Math.floor((processed - 1) / (industryData.keywords.length * 2));
-        const isAfterVariation = (processed - 1) % 2 === 0;
-        
-        if (cityIndex < cities.length && keywordIndex < industryData.keywords.length) {
-          const keyword = industryData.keywords[keywordIndex];
-          const city = cities[cityIndex];
-          const displayKeyword = isAfterVariation 
-            ? `"${keyword} ${city}"` 
-            : `"${city} ${keyword}"`;
-          setCurrentKeyword(displayKeyword);
-        }
+      processed += 5; // Process multiple keywords at once for smoother progress
+      const batchProgress = Math.floor(processed / batchSize) + 1;
+      
+      if (batchProgress > currentBatch) {
+        currentBatch = batchProgress;
+        setCurrentKeyword(`Processing batch ${Math.min(currentBatch, totalBatches)} of ${totalBatches}...`);
       }
+      
+      setProcessingProgress(Math.min((processed / totalKeywords) * 100, 95));
+      
       if (processed >= totalKeywords) {
+        setCurrentKeyword("Finalizing results...");
+        setProcessingProgress(98);
         clearInterval(interval);
       }
-    }, 50); // Faster interval since we have more keywords
+    }, 100); // Smooth progress updates
 
     startResearchMutation.mutate({
       industry: selectedIndustry,
