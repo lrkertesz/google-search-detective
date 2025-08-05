@@ -179,3 +179,38 @@ export function exportHVACTAMReport(research: {
     URL.revokeObjectURL(url);
   }
 }
+export function exportAllReports(research: { 
+  industry: string; 
+  cities: string[]; 
+  results: KeywordResult[];
+  createdAt: Date;
+}, tamData?: TAMCalculation) {
+  const timestamp = new Date(research.createdAt).toISOString().split("T")[0];
+  const citiesString = research.cities.join("_").replace(/\s+/g, "_");
+  const industryName = research.industry.replace("-", "_");
+  
+  // Generate all four export files
+  const keywordsWithVolume = research.results.filter(k => k.searchVolume > 0);
+  const keywordsWithoutVolume = research.results.filter(k => k.searchVolume === 0);
+  
+  // 1. PPC Keywords Export
+  exportToCSV(keywordsWithVolume, `PPC_Keywords_${industryName}_${citiesString}_${timestamp}.csv`);
+  
+  // Small delay between downloads to prevent browser blocking
+  setTimeout(() => {
+    // 2. SEO Targets Export
+    exportToCSV(keywordsWithoutVolume, `SEO_Targets_${industryName}_${citiesString}_${timestamp}.csv`);
+  }, 100);
+  
+  setTimeout(() => {
+    // 3. Complete Dataset Export
+    exportToCSV(research.results, `Complete_Dataset_${industryName}_${citiesString}_${timestamp}.csv`);
+  }, 200);
+  
+  // 4. TAM Report Export (if HVAC and TAM data available)
+  if (research.industry === "HVAC" && tamData) {
+    setTimeout(() => {
+      exportHVACTAMReport(research, tamData);
+    }, 300);
+  }
+}

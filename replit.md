@@ -90,7 +90,7 @@ Business Context: User is building a comprehensive business intelligence suite w
 3. **API Integration**: Real keyword data retrieved from Keywords Everywhere API (no mock data)
 4. **Results Processing**: Keywords separated into PPC opportunities (with volume) and SEO targets (zero volume)
 5. **Result Storage**: Research saved to database with customizable titles for organization
-6. **Export Options**: Multiple CSV export formats for different use cases
+6. **Export Options**: Single-click "Download All Reports" plus individual CSV export formats for comprehensive data delivery
 
 ### External Dependencies
 

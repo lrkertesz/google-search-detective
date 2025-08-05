@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useToast } from "@/hooks/use-toast";
-import { exportToCSV, exportHVACTAMReport } from "@/lib/csvExport";
+import { exportToCSV, exportHVACTAMReport, exportAllReports } from "@/lib/csvExport";
 import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 import type { KeywordResearch, KeywordResult, Industry, TAMCalculation } from "@shared/schema";
@@ -287,6 +287,16 @@ export default function Home() {
   const exportTAMReport = () => {
     if (currentResearch && tamData) {
       exportHVACTAMReport(currentResearch, tamData);
+    }
+  };
+
+  const exportAllReportsHandler = () => {
+    if (currentResearch) {
+      exportAllReports(currentResearch, tamData || undefined);
+      toast({
+        title: "Export Complete",
+        description: `${selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files downloaded successfully`,
+      });
     }
   };
 
@@ -869,6 +879,16 @@ export default function Home() {
                     <p className="text-neutral-dark">Download complete keyword research data in different formats</p>
                   </div>
                   <div className="flex space-x-3">
+                    {/* Primary "Download All" Button */}
+                    <Button 
+                      onClick={exportAllReportsHandler}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2.5 shadow-lg"
+                    >
+                      <Download size={18} className="mr-2" />
+                      Download All Reports ({selectedIndustry === 'HVAC' && tamData ? '4' : '3'} files)
+                    </Button>
+                    
+                    {/* Individual Export Button */}
                     <Button 
                       onClick={exportCSVComplete}
                       variant="outline"
