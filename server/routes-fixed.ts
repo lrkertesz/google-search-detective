@@ -19,6 +19,16 @@ type KeywordResult = {
 export async function registerFixedRoutes(app: Express): Promise<Server> {
   console.log("🌟 FIXED ROUTES LOADING:", new Date().toISOString());
 
+  // Get research history
+  app.get("/api/keyword-research", async (req, res) => {
+    try {
+      const researches = await storage.getKeywordResearches();
+      res.json(researches);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Nuclear fix keyword research route
   app.post("/api/keyword-research", async (req, res) => {
     console.log("🌟🌟🌟 NUCLEAR FIX ROUTE EXECUTING:", new Date().toISOString());
