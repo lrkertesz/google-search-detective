@@ -28,6 +28,7 @@ interface ApiKeyStatus {
 
 export default function Admin() {
   const [editingIndustry, setEditingIndustry] = useState<EditingIndustry | null>(null);
+  const [isEditingOpen, setIsEditingOpen] = useState(false);
   const [newIndustry, setNewIndustry] = useState({ name: "", label: "", keywords: "" });
   const [isCreating, setIsCreating] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
@@ -131,7 +132,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/industries"] });
-      setEditingIndustry(null);
+      closeEditDialog();
       toast({
         title: "Industry Updated",
         description: "Industry has been updated successfully",
@@ -244,6 +245,7 @@ export default function Admin() {
             ? industry.keywords
             : ''
       });
+      setIsEditingOpen(true);
     } catch (error) {
       console.error('Error opening edit dialog:', error);
       toast({
@@ -252,6 +254,11 @@ export default function Admin() {
         variant: "destructive",
       });
     }
+  };
+
+  const closeEditDialog = () => {
+    setIsEditingOpen(false);
+    setEditingIndustry(null);
   };
 
   if (industriesLoading || settingsLoading) {
@@ -457,7 +464,7 @@ export default function Admin() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Dialog>
+                        <Dialog open={isEditingOpen} onOpenChange={setIsEditingOpen}>
                           <DialogTrigger asChild>
                             <Button 
                               variant="outline" 
@@ -508,7 +515,7 @@ export default function Admin() {
                                   />
                                 </div>
                                 <div className="flex justify-end space-x-2">
-                                  <Button variant="outline" onClick={() => setEditingIndustry(null)}>
+                                  <Button variant="outline" onClick={closeEditDialog}>
                                     Cancel
                                   </Button>
                                   <Button 
