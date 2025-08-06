@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X, CheckSquare, Square, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Trash2, Eye, Download, Calendar, MapPin, Building2, ArrowLeft, Edit2, Check, X, CheckSquare, Square, ChevronDown, ChevronUp, ArrowDownWideNarrow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,15 +9,98 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { exportToCSV } from "@/lib/csvExport";
-import type { KeywordResearch } from "@shared/schema";
+import type { KeywordResearch, KeywordResult } from "@shared/schema";
+
+type SortField = 'keyword' | 'searchVolume' | 'cpc';
+type SortDirection = 'asc' | 'desc';
 
 export default function HistoryPage() {
   const { toast } = useToast();
   const [selectedResearch, setSelectedResearch] = useState<KeywordResearch | null>(null);
+
+  // Sorting functions
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'keyword' ? 'asc' : 'desc');
+    }
+  };
+
+  const sortKeywords = (keywords: KeywordResult[], field: SortField, direction: SortDirection) => {
+    return [...keywords].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (field) {
+        case 'keyword':
+          aValue = a.keyword.toLowerCase();
+          bValue = b.keyword.toLowerCase();
+          break;
+        case 'searchVolume':
+          aValue = a.searchVolume;
+          bValue = b.searchVolume;
+          break;
+        case 'cpc':
+          aValue = a.cpc;
+          bValue = b.cpc;
+          break;
+        default:
+          return 0;
+      }
+
+      if (direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+  };
+
+  // Sortable table head component
+  const SortableTableHead = ({ 
+    field, 
+    children, 
+    currentField, 
+    currentDirection, 
+    onSort 
+  }: {
+    field: SortField;
+    children: React.ReactNode;
+    currentField: SortField;
+    currentDirection: SortDirection;
+    onSort: (field: SortField) => void;
+  }) => (
+    <th 
+      className="cursor-pointer hover:bg-gray-50 select-none text-left py-3 px-4 font-medium text-gray-700"
+      onClick={() => onSort(field)}
+    >
+      <div className="flex items-center justify-between">
+        {children}
+        <div className="ml-2">
+          {currentField === field ? (
+            currentDirection === 'asc' ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )
+          ) : (
+            <div className="h-4 w-4 opacity-30">
+              <ChevronDown className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      </div>
+    </th>
+  );
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showZeroVolumeKeywords, setShowZeroVolumeKeywords] = useState<boolean>(false);
+  const [sortField, setSortField] = useState<SortField>('searchVolume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Get research history
   const { data: researchHistory, isLoading } = useQuery<KeywordResearch[]>({
@@ -325,18 +408,80 @@ export default function HistoryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
+                <div className="text-sm text-gray-600 flex items-center">
+                  <ArrowDownWideNarrow size={16} className="mr-2" />
+                  Click column headers to sort by search volume, CPC, or keyword
+                </div>
+              </div>
+              
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-gray-700">Keyword</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-700">Search Volume</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-700">CPC ($)</th>
+                      <SortableTableHead 
+                        field="keyword" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
+                        Keyword
+                      </SortableTableHead>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700">
+                        <div className="flex items-center justify-end">
+                          <button
+                            className="cursor-pointer hover:bg-gray-50 select-none"
+                            onClick={() => handleSort('searchVolume')}
+                          >
+                            <div className="flex items-center">
+                              Search Volume
+                              <div className="ml-2">
+                                {sortField === 'searchVolume' ? (
+                                  sortDirection === 'asc' ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )
+                                ) : (
+                                  <div className="h-4 w-4 opacity-30">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700">
+                        <div className="flex items-center justify-end">
+                          <button
+                            className="cursor-pointer hover:bg-gray-50 select-none"
+                            onClick={() => handleSort('cpc')}
+                          >
+                            <div className="flex items-center">
+                              CPC ($)
+                              <div className="ml-2">
+                                {sortField === 'cpc' ? (
+                                  sortDirection === 'asc' ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )
+                                ) : (
+                                  <div className="h-4 w-4 opacity-30">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </th>
                       <th className="text-right py-3 px-4 font-medium text-gray-700">PPC Budget Cost ($/mo)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedResearch.results.filter(k => k.searchVolume > 0).map((result, index) => (
+                    {sortKeywords(selectedResearch.results.filter(k => k.searchVolume > 0), sortField, sortDirection).map((result, index) => (
                       <tr key={index} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4 text-sm">{result.keyword}</td>
                         <td className="py-3 px-4 text-right">{result.searchVolume.toLocaleString()}/mo</td>
