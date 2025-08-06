@@ -19,7 +19,7 @@ import type { KeywordResearch, KeywordResult, Industry, TAMCalculation } from "@
 
 // Industries are now loaded dynamically from the database
 
-type SortField = 'keyword' | 'searchVolume' | 'cpc';
+type SortField = 'keyword' | 'searchVolume' | 'cpc' | 'budgetCost';
 type SortDirection = 'asc' | 'desc';
 
 export default function Home() {
@@ -64,6 +64,10 @@ export default function Home() {
         case 'cpc':
           aValue = a.cpc;
           bValue = b.cpc;
+          break;
+        case 'budgetCost':
+          aValue = Math.round(a.searchVolume * a.cpc * 0.30);
+          bValue = Math.round(b.searchVolume * b.cpc * 0.30);
           break;
         default:
           return 0;
@@ -725,7 +729,7 @@ export default function Home() {
               <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
                 <div className="text-sm text-gray-600 flex items-center">
                   <ArrowDownWideNarrow size={16} className="mr-2" />
-                  Click column headers to sort by search volume, CPC, or keyword
+                  Click column headers to sort by search volume, CPC, budget cost, or keyword
                 </div>
               </div>
               
@@ -757,9 +761,14 @@ export default function Home() {
                       >
                         CPC
                       </SortableTableHead>
-                      <TableHead>
+                      <SortableTableHead 
+                        field="budgetCost" 
+                        currentField={sortField} 
+                        currentDirection={sortDirection} 
+                        onSort={handleSort}
+                      >
                         PPC Budget Cost
-                      </TableHead>
+                      </SortableTableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

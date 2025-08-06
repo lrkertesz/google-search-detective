@@ -11,7 +11,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { exportToCSV } from "@/lib/csvExport";
 import type { KeywordResearch, KeywordResult } from "@shared/schema";
 
-type SortField = 'keyword' | 'searchVolume' | 'cpc';
+type SortField = 'keyword' | 'searchVolume' | 'cpc' | 'budgetCost';
 type SortDirection = 'asc' | 'desc';
 
 export default function HistoryPage() {
@@ -45,6 +45,10 @@ export default function HistoryPage() {
         case 'cpc':
           aValue = a.cpc;
           bValue = b.cpc;
+          break;
+        case 'budgetCost':
+          aValue = Math.round(a.searchVolume * a.cpc * 0.30);
+          bValue = Math.round(b.searchVolume * b.cpc * 0.30);
           break;
         default:
           return 0;
@@ -411,7 +415,7 @@ export default function HistoryPage() {
               <div className="px-6 py-2 bg-gray-50 border-b border-gray-200">
                 <div className="text-sm text-gray-600 flex items-center">
                   <ArrowDownWideNarrow size={16} className="mr-2" />
-                  Click column headers to sort by search volume, CPC, or keyword
+                  Click column headers to sort by search volume, CPC, budget cost, or keyword
                 </div>
               </div>
               
@@ -477,7 +481,31 @@ export default function HistoryPage() {
                           </button>
                         </div>
                       </th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-700">PPC Budget Cost ($/mo)</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-700">
+                        <div className="flex items-center justify-end">
+                          <button
+                            className="cursor-pointer hover:bg-gray-50 select-none"
+                            onClick={() => handleSort('budgetCost')}
+                          >
+                            <div className="flex items-center">
+                              PPC Budget Cost ($/mo)
+                              <div className="ml-2">
+                                {sortField === 'budgetCost' ? (
+                                  sortDirection === 'asc' ? (
+                                    <ChevronUp className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronDown className="h-4 w-4" />
+                                  )
+                                ) : (
+                                  <div className="h-4 w-4 opacity-30">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
