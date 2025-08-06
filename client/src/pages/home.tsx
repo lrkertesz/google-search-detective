@@ -603,12 +603,24 @@ export default function Home() {
                     <TrendingUp className="mr-2 text-green-600" size={20} />
                     Total Addressable Market (TAM) Analysis
                   </h3>
-                  <div className="text-sm text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200 mb-4">
-                    <div className="font-medium text-amber-800 mb-1">📊 Revenue Methodology:</div>
-                    <p className="text-amber-700">
-                      This calculation accounts for the 30% of HVAC customers who have annual maintenance contracts 
-                      and won't search Google for emergency services. The TAM represents realistic revenue opportunity 
-                      available through PPC advertising campaigns.
+                  <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+                    <div className="font-semibold text-blue-800 mb-2">🎯 What is "Total Addressable Market" (TAM)?</div>
+                    <p className="text-blue-700 mb-3">
+                      TAM represents the realistic revenue opportunity available to your business through Google advertising. 
+                      We calculate a conservative estimate by removing customers who already have annual inspection contracts 
+                      with existing HVAC companies.
+                    </p>
+                    <div className="font-medium text-blue-800 mb-1">🔧 Why Annual Inspection Contracts Matter:</div>
+                    <p className="text-blue-700 mb-3">
+                      Most HVAC businesses sell annual inspection contracts that include Spring (A/C prep) and Fall (heating prep) 
+                      system checkups. These customers rarely search Google for emergency services because they have an established 
+                      relationship with their contractor. Our TAM removes these customers to show your true addressable opportunity.
+                    </p>
+                    <div className="font-medium text-blue-800 mb-1">💡 Your Digital Marketing Opportunity:</div>
+                    <p className="text-blue-700">
+                      The TAM shows the revenue potential from customers actively searching Google for HVAC services. 
+                      The next logical question: "How do I position my business to capture these searches?" 
+                      That's where strategic PPC campaigns and competitive analysis become essential for growth.
                     </p>
                   </div>
                   
