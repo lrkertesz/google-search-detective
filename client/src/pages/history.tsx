@@ -621,6 +621,27 @@ export default function HistoryPage() {
               <p className="text-blue-700">
                 Use these insights to build strategic PPC campaigns that capture your Total Addressable Market opportunity.
               </p>
+              
+              {/* PPC Strategy Video Section */}
+              <div className="mt-4 bg-white rounded-lg p-3 border border-blue-300">
+                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://player.vimeo.com/video/1014948582?badge=0&autopause=0&player_id=0&app_id=58479"
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                    title="PPC Campaign Strategy Guide"
+                    className="w-full h-full"
+                  ></iframe>
+                </div>
+                <div className="text-xs text-gray-500 mt-2 text-center">
+                  Watch: How to Transform Keyword Data into Profitable PPC Campaigns
+                </div>
+                <div className="text-xs text-blue-600 mt-1 text-center font-medium">
+                  Learn the exact process + discover our done-for-you campaign management services
+                </div>
+              </div>
             </div>
           </div>
 
