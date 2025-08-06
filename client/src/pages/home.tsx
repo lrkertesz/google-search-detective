@@ -604,24 +604,55 @@ export default function Home() {
                     Total Addressable Market (TAM) Analysis
                   </h3>
                   <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
-                    <div className="font-semibold text-blue-800 mb-2">🎯 What is "Total Addressable Market" (TAM)?</div>
-                    <p className="text-blue-700 mb-3">
-                      TAM represents the realistic revenue opportunity available to your business through Google advertising. 
-                      We calculate a conservative estimate by removing customers who already have annual inspection contracts 
-                      with existing HVAC companies.
-                    </p>
-                    <div className="font-medium text-blue-800 mb-1">🔧 Why Annual Inspection Contracts Matter:</div>
-                    <p className="text-blue-700 mb-3">
-                      Most HVAC businesses sell annual inspection contracts that include Spring (A/C prep) and Fall (heating prep) 
-                      system checkups. These customers rarely search Google for emergency services because they have an established 
-                      relationship with their contractor. Our TAM removes these customers to show your true addressable opportunity.
-                    </p>
-                    <div className="font-medium text-blue-800 mb-1">💡 Your Digital Marketing Opportunity:</div>
-                    <p className="text-blue-700">
-                      The TAM shows the revenue potential from customers actively searching Google for HVAC services. 
-                      The next logical question: "How do I position my business to capture these searches?" 
-                      That's where strategic PPC campaigns and competitive analysis become essential for growth.
-                    </p>
+                    <div className="font-semibold text-blue-800 mb-3">🎯 Understanding Total Addressable Market (TAM)</div>
+                    
+                    {/* Video Section */}
+                    <div className="mb-4 bg-white rounded-lg p-3 border border-blue-300">
+                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <iframe
+                          src="https://player.vimeo.com/video/1014948582?badge=0&autopause=0&player_id=0&app_id=58479"
+                          width="100%"
+                          height="100%"
+                          frameBorder="0"
+                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                          title="TAM Analysis Explanation"
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2 text-center">
+                        Watch: How TAM Analysis Drives Strategic Digital Marketing Decisions
+                      </div>
+                    </div>
+
+                    {/* Text Explanation */}
+                    <div className="space-y-3">
+                      <div>
+                        <div className="font-medium text-blue-800 mb-1">What is "Total Addressable Market"?</div>
+                        <p className="text-blue-700">
+                          TAM represents the realistic revenue opportunity available to your business through Google advertising. 
+                          We calculate a conservative estimate by removing customers who already have annual inspection contracts 
+                          with existing HVAC companies.
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <div className="font-medium text-blue-800 mb-1">🔧 Why Annual Inspection Contracts Matter:</div>
+                        <p className="text-blue-700">
+                          Most HVAC businesses sell annual inspection contracts that include Spring (A/C prep) and Fall (heating prep) 
+                          system checkups. These customers rarely search Google for emergency services because they have an established 
+                          relationship with their contractor. Our TAM removes these customers to show your true addressable opportunity.
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <div className="font-medium text-blue-800 mb-1">💡 Your Digital Marketing Opportunity:</div>
+                        <p className="text-blue-700">
+                          The TAM shows the revenue potential from customers actively searching Google for HVAC services. 
+                          The next logical question: "How do I position my business to capture these searches?" 
+                          That's where strategic PPC campaigns and competitive analysis become essential for growth.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
