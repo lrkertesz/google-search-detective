@@ -605,27 +605,9 @@ export default function Home() {
                   </h3>
                   <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
                     <div className="font-semibold text-blue-800 mb-3">🎯 Understanding Total Addressable Market (TAM)</div>
-                    
-                    {/* Video Section */}
-                    <div className="mb-4 bg-white rounded-lg p-3 border border-blue-300">
-                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <iframe
-                          src="https://player.vimeo.com/video/1014948582?badge=0&autopause=0&player_id=0&app_id=58479"
-                          width="100%"
-                          height="100%"
-                          frameBorder="0"
-                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
-                          title="TAM Analysis Explanation"
-                          className="w-full h-full"
-                        ></iframe>
-                      </div>
-                      <div className="text-xs text-gray-500 mt-2 text-center">
-                        Watch: How TAM Analysis Drives Strategic Digital Marketing Decisions
-                      </div>
-                    </div>
 
                     {/* Text Explanation */}
-                    <div className="space-y-3">
+                    <div className="space-y-3 mb-4">
                       <div>
                         <div className="font-medium text-blue-800 mb-1">What is "Total Addressable Market"?</div>
                         <p className="text-blue-700">
@@ -651,6 +633,24 @@ export default function Home() {
                           The next logical question: "How do I position my business to capture these searches?" 
                           That's where strategic PPC campaigns and competitive analysis become essential for growth.
                         </p>
+                      </div>
+                    </div>
+                    
+                    {/* Video Section */}
+                    <div className="bg-white rounded-lg p-3 border border-blue-300">
+                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                        <iframe
+                          src="https://player.vimeo.com/video/1014948582?badge=0&autopause=0&player_id=0&app_id=58479"
+                          width="100%"
+                          height="100%"
+                          frameBorder="0"
+                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+                          title="TAM Analysis Explanation"
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2 text-center">
+                        Watch: How TAM Analysis Drives Strategic Digital Marketing Decisions
                       </div>
                     </div>
                   </div>
