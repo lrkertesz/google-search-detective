@@ -508,6 +508,19 @@ export default function HistoryPage() {
                     </div>
                   </div>
                   
+                  {/* Section Separator */}
+                  <div className="border-t-2 border-green-200 pt-6 mb-6">
+                    <div className="flex items-center justify-center mb-6">
+                      <div className="flex-1 border-t border-gray-300"></div>
+                      <div className="px-4">
+                        <h4 className="text-lg font-semibold text-gray-800 bg-white px-3 py-1 rounded-full border border-green-300">
+                          📊 Your Market-Specific TAM Data
+                        </h4>
+                      </div>
+                      <div className="flex-1 border-t border-gray-300"></div>
+                    </div>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div className="text-center p-4 bg-white rounded-lg border border-green-200">
                       <div className="text-2xl font-bold text-green-600">
