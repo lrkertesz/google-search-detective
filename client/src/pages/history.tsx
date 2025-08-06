@@ -603,6 +603,27 @@ export default function HistoryPage() {
             );
           })()}
 
+          {/* Section Separator for Keywords */}
+          <div className="border-t-2 border-blue-200 pt-8 mb-6">
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <div className="px-4">
+                <h4 className="text-lg font-semibold text-gray-800 bg-white px-3 py-1 rounded-full border border-blue-300">
+                  🎯 Strategic Keyword Targeting Data
+                </h4>
+              </div>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+            <div className="text-center text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+              <p className="font-medium text-blue-800 mb-2">
+                The data below shows exactly which keyword phrases to target and the budget needed for each one.
+              </p>
+              <p className="text-blue-700">
+                Use these insights to build strategic PPC campaigns that capture your Total Addressable Market opportunity.
+              </p>
+            </div>
+          </div>
+
           {/* Keywords with Search Volume */}
           <Card>
             <CardHeader>
