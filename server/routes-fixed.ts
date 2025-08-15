@@ -39,6 +39,193 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // BIS Integration endpoint
+  app.post("/api/bis-integration", async (req, res) => {
+    try {
+      const { location, industry, analysisId } = req.body;
+      
+      console.log('BIS Integration Request:', { location, industry, analysisId });
+      
+      if (!location || !industry) {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: location and industry",
+          analysisId: analysisId
+        });
+      }
+      
+      // Parse location (format: "City, State" or single city)
+      const cities = location.includes(',') ? [location.split(',')[0].trim()] : [location];
+      
+      // Map industry names to our system
+      const industryMapping = {
+        'HVAC': 'HVAC',
+        'Plumbing': 'Plumbing', 
+        'Electrical': 'Electrical',
+        'Digital Marketing': 'Digital Marketing',
+        'Roofing': 'HVAC' // Default to HVAC if not found
+      };
+      
+      const mappedIndustry = industryMapping[industry] || 'HVAC';
+      
+      // Get industry data from our database
+      const industryData = await storage.getIndustryByName(mappedIndustry);
+      if (!industryData) {
+        return res.status(400).json({
+          success: false,
+          error: `Industry '${mappedIndustry}' not found in database`,
+          analysisId: analysisId
+        });
+      }
+      
+      // Generate keyword combinations using our existing logic
+      const keywordCombinations: string[] = [];
+      const keywordSet = new Set<string>();
+      
+      industryData.keywords.forEach(keyword => {
+        cities.forEach(city => {
+          const keywordCity = `${keyword} ${city}`;
+          const cityKeyword = `${city} ${keyword}`;
+          
+          if (!keywordSet.has(keywordCity)) {
+            keywordSet.add(keywordCity);
+            keywordCombinations.push(keywordCity);
+          }
+          if (!keywordSet.has(cityKeyword)) {
+            keywordSet.add(cityKeyword);
+            keywordCombinations.push(cityKeyword);
+          }
+        });
+      });
+      
+      console.log(`🌟 Generated ${keywordCombinations.length} keyword combinations for BIS`);
+      
+      // Get Keywords Everywhere API key
+      const settings = await storage.getSettings();
+      const apiKey = settings?.keywordsEverywhereApiKey;
+      
+      if (!apiKey) {
+        return res.status(400).json({
+          success: false,
+          error: "Keywords Everywhere API key not configured",
+          analysisId: analysisId
+        });
+      }
+      
+      // Make API call to Keywords Everywhere
+      console.log("🌟 Making Keywords Everywhere API call for BIS...");
+      
+      const response = await fetch('https://api.keywordseverywhere.com/v1/get_keyword_data', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          country: 'US',
+          currency: 'USD',
+          dataSource: 'gkp',
+          kw: keywordCombinations
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Keywords Everywhere API error: ${response.status}`);
+      }
+      
+      const apiData = await response.json();
+      console.log("🌟 BIS API Response received:", apiData?.data?.length || 0, "results");
+      
+      // Process results into our format
+      const results: KeywordResult[] = [];
+      const keywordsWithVolume: KeywordResult[] = [];
+      const keywordsWithoutVolume: KeywordResult[] = [];
+      
+      if (apiData?.data) {
+        apiData.data.forEach((item: any) => {
+          const result: KeywordResult = {
+            keyword: item.keyword,
+            searchVolume: item.vol || 0,
+            cpc: parseFloat(item.cpc) || 0,
+            competition: item.competition || 0
+          };
+          
+          results.push(result);
+          
+          if (result.searchVolume > 0) {
+            keywordsWithVolume.push(result);
+          } else {
+            keywordsWithoutVolume.push(result);
+          }
+        });
+      }
+      
+      // Calculate summary statistics
+      const totalKeywords = results.length;
+      const avgSearchVolume = keywordsWithVolume.length > 0 
+        ? Math.round(keywordsWithVolume.reduce((sum, k) => sum + k.searchVolume, 0) / keywordsWithVolume.length)
+        : 0;
+      const avgCPC = keywordsWithVolume.length > 0
+        ? parseFloat((keywordsWithVolume.reduce((sum, k) => sum + k.cpc, 0) / keywordsWithVolume.length).toFixed(2))
+        : 0;
+      
+      // Store the research in our database for consistency
+      const savedResearch = await storage.createKeywordResearch({
+        title: `BIS Integration - ${location} ${industry}`,
+        industry: mappedIndustry,
+        cities: cities,
+        results: results
+      });
+      
+      // Return standardized BIS format
+      res.json({
+        success: true,
+        location: location,
+        industry: industry,
+        analysisId: analysisId,
+        gsdResearchId: savedResearch.id, // Include our internal ID for reference
+        keywordData: {
+          primaryKeywords: keywordsWithVolume.slice(0, 10), // Top 10 with volume
+          longTailKeywords: keywordsWithVolume.filter(k => k.keyword.split(' ').length > 3),
+          competitorKeywords: [], // We don't currently track competitor-specific data
+          summary: {
+            totalKeywords: totalKeywords,
+            keywordsWithVolume: keywordsWithVolume.length,
+            keywordsWithoutVolume: keywordsWithoutVolume.length,
+            avgSearchVolume: avgSearchVolume,
+            avgCPC: avgCPC,
+            competitionLevel: "medium" // Default since we don't calculate this specifically
+          },
+          seasonalTrends: {}, // Not currently implemented
+          recommendations: [
+            `Focus on ${keywordsWithVolume.slice(0, 5).map(k => k.keyword).join(', ')} for highest impact`,
+            `Consider ${keywordsWithoutVolume.length} zero-volume keywords for SEO content strategy`,
+            avgCPC > 0 ? `Average CPC of $${avgCPC} suggests competitive market` : "Low competition market with minimal paid advertising"
+          ]
+        },
+        totalKeywords: totalKeywords,
+        dataSource: "Keywords Everywhere API via Google Search Detective",
+        methodology: "Geo-targeted keyword combinations with dual city-keyword variations",
+        analysisTimestamp: new Date().toISOString(),
+        tamCalculation: mappedIndustry === 'HVAC' ? {
+          available: true,
+          note: "TAM calculation available for HVAC industry"
+        } : {
+          available: false,
+          note: "TAM calculation currently only available for HVAC industry"
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('BIS Integration Error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        analysisId: req.body.analysisId
+      });
+    }
+  });
+
   // Nuclear fix keyword research route
   app.post("/api/keyword-research", async (req, res) => {
     console.log("🌟🌟🌟 NUCLEAR FIX ROUTE EXECUTING:", new Date().toISOString());
