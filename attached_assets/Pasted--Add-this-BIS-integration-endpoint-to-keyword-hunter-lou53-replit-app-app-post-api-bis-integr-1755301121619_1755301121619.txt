@@ -1,0 +1,66 @@
+// Add this BIS integration endpoint to keyword-hunter-lou53.replit.app
+
+app.post('/api/bis-integration', async (req, res) => {
+  try {
+    const { location, industry, analysisId } = req.body;
+    
+    console.log('BIS Integration Request:', { location, industry, analysisId });
+    
+    // Parse location (format: "City, State")
+    const [city, state] = location.split(', ');
+    
+    // Map industry to your app's industry codes
+    const industryMapping = {
+      'HVAC': 1,
+      'Plumbing': 2, 
+      'Electrical': 3,
+      'Roofing': 4
+    };
+    
+    const industryCode = industryMapping[industry] || 1;
+    
+    // Run your existing keyword analysis function
+    const keywordResults = await performKeywordAnalysis({
+      city: city,
+      state: state,
+      industry: industryCode,
+      analysisId: analysisId
+    });
+    
+    // Return standardized BIS format
+    res.json({
+      success: true,
+      location: location,
+      industry: industry,
+      analysisId: analysisId,
+      keywordData: {
+        primaryKeywords: keywordResults.primaryKeywords || [],
+        longTailKeywords: keywordResults.longTailKeywords || [],
+        competitorKeywords: keywordResults.competitorKeywords || [],
+        summary: {
+          totalKeywords: keywordResults.totalKeywords || 0,
+          avgSearchVolume: keywordResults.avgSearchVolume || 0,
+          avgCPC: keywordResults.avgCPC || 0,
+          competitionLevel: keywordResults.competitionLevel || "medium"
+        },
+        seasonalTrends: keywordResults.seasonalTrends || {},
+        recommendations: keywordResults.recommendations || []
+      },
+      totalKeywords: keywordResults.totalKeywords || 0,
+      dataSource: "Google Search Detective + SEMrush + Ahrefs",
+      methodology: "Keyword Hunter API v2.0",
+      analysisTimestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('BIS Integration Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      analysisId: req.body.analysisId
+    });
+  }
+});
+
+// No changes needed to your existing performKeywordAnalysis function
+// Just ensure it returns the data structure shown above
