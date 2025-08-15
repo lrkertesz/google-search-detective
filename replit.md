@@ -8,12 +8,21 @@ This is a full-stack keyword research application that serves as one component o
 
 The opportunity scoring prioritizes cost-effectiveness (non-zero CPC values) combined with viable search volume for practical PPC campaign planning, accounting for Google's broad matching behavior that can override low-cost keywords with higher-bid alternatives.
 
-**Business Intelligence Suite Context:**
-This keyword research tool is designed to work alongside:
-1. Market revenue estimator by industry for specific cities
-2. Competition analyzer showing business rankings for geo-targeted keyword phrases in Maps 3-Pack and Organic SEO
+**Business Intelligence Suite Integration (August 2025):**
+Successfully integrated as the keyword research component within a comprehensive 4-app Business Intelligence System (BIS) using the "Orchestra Conductor" pattern. BIS serves as the central orchestrator, making API calls to specialized expert apps:
 
-Together, these tools provide complete market entry analysis for service businesses.
+1. **Google Search Detective (GSD)** - Geo-targeted keyword research with Keywords Everywhere API
+2. **Market Revenue Estimator** - TAM calculations by industry for specific cities  
+3. **Competition Analyzer** - Business rankings for geo-targeted phrases in Maps 3-Pack and SEO
+4. **BIS Central Hub** - Consolidates intelligence from all three apps into comprehensive reports
+
+**API Integration Workflow:**
+- BIS → GSD `/api/bis-integration` → GSD `/api/keyword-research` → Keywords Everywhere API
+- GSD handles all keyword generation, API authentication, and data processing
+- BIS receives standardized formatted results for report generation
+- Maintains separation of concerns: GSD remains the keyword research expert, BIS consumes that expertise
+
+**Integration Status:** ✅ Live and ready for testing with proper authentication and error handling
 
 **TAM Calculator Integration (Added January 2025):**
 The application now includes a sophisticated Total Addressable Market calculator specifically for HVAC industry searches. This feature transforms raw keyword data into actionable business intelligence by calculating realistic revenue opportunities available through PPC advertising campaigns. The TAM methodology accounts for the 30% of HVAC customers who have annual maintenance contracts and won't search Google for emergency services.
