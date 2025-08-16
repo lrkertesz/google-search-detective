@@ -93,6 +93,12 @@
 - **Performance**: Optimized video sizing and responsive design
 - **Accessibility**: Proper iframe attributes and screen reader support
 
+### Debugging Standards
+- **No Speculation**: Do not "speculate" about the cause of a problem. Refer to the debugging system for identification of the problem's cause
+- **Robust Debugging Required**: If a robust debugging system is not present, install one immediately
+- **Evidence-Based Diagnosis**: Use server logs, browser console, network traces, and error messages to identify root causes
+- **Systematic Problem Solving**: Follow debugging output rather than assumptions about potential issues
+
 ### Feature Integration
 - **TAM Calculator**: HVAC-specific revenue calculations with 30% market reduction
 - **Keyword Research**: Geo-targeted with search volume and CPC data
