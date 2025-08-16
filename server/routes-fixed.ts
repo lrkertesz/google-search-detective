@@ -18,6 +18,8 @@ type KeywordResult = {
 
 export async function registerFixedRoutes(app: Express): Promise<Server> {
   console.log("🌟 FIXED ROUTES LOADING:", new Date().toISOString());
+  console.log("🌟 ENVIRONMENT:", app.get("env"));
+  console.log("🌟 NODE_ENV:", process.env.NODE_ENV);
 
   // Get research history
   app.get("/api/keyword-research", async (req, res) => {
@@ -39,8 +41,23 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add a simple health check endpoint
+  app.get("/api/health", async (req, res) => {
+    console.log("🌟 HEALTH CHECK CALLED");
+    res.json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      environment: app.get("env"),
+      nodeEnv: process.env.NODE_ENV
+    });
+  });
+
   // BIS Integration endpoint - for BIS app to call GSD
   app.post("/api/bis-integration", async (req, res) => {
+    console.log("🌟🌟🌟 BIS INTEGRATION ENDPOINT HIT!!!");
+    console.log("🌟 Request method:", req.method);
+    console.log("🌟 Request path:", req.path);
+    console.log("🌟 Request body:", req.body);
     try {
       const { location, industry, analysisId } = req.body;
       
