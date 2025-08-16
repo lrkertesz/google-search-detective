@@ -24,6 +24,13 @@ Successfully integrated as the keyword research component within a comprehensive
 
 **Integration Status:** ✅ Live and ready for testing with proper authentication and error handling
 
+**DELETE Functionality Fixed (August 2025):**
+Resolved critical issue where research deletion was failing due to missing CRUD routes in routes-fixed.ts. The frontend was receiving HTML responses instead of JSON when attempting deletions. Fixed by:
+- Added missing GET, PUT, DELETE routes to routes-fixed.ts for keyword research management
+- Implemented optimistic updates in frontend for immediate visual feedback
+- Confirmed all API endpoints now return proper JSON responses with 200 status codes
+- Research history management now functions correctly with instant deletion feedback
+
 **TAM Calculator Integration (Added January 2025):**
 The application now includes a sophisticated Total Addressable Market calculator specifically for HVAC industry searches. This feature transforms raw keyword data into actionable business intelligence by calculating realistic revenue opportunities available through PPC advertising campaigns. The TAM methodology accounts for the 30% of HVAC customers who have annual maintenance contracts and won't search Google for emergency services.
 
