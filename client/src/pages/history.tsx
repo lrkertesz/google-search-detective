@@ -115,45 +115,103 @@ export default function HistoryPage() {
   const deleteResearchMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await apiRequest("DELETE", `/api/keyword-research/${id}`);
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
-      toast({
-        title: "Research Deleted",
-        description: "Search history item removed successfully",
-      });
+    onMutate: async (id: number) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["/api/keyword-research"] });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<KeywordResearch[]>(["/api/keyword-research"]);
+
+      // Optimistically update to the new value
+      if (previousData) {
+        queryClient.setQueryData<KeywordResearch[]>(
+          ["/api/keyword-research"], 
+          previousData.filter(item => item.id !== id)
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
     },
-    onError: (error: any) => {
+    onError: (error: any, id: number, context: any) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(["/api/keyword-research"], context.previousData);
+      }
       toast({
         title: "Delete Failed",
         description: error.message,
         variant: "destructive",
       });
     },
+    onSuccess: () => {
+      toast({
+        title: "Research Deleted",
+        description: "Search history item removed successfully",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
+    },
   });
 
   // Bulk delete mutation
   const bulkDeleteMutation = useMutation({
     mutationFn: async (ids: number[]) => {
-      await Promise.all(ids.map(id => 
-        apiRequest("DELETE", `/api/keyword-research/${id}`)
-      ));
+      const results = await Promise.all(ids.map(async id => {
+        const response = await apiRequest("DELETE", `/api/keyword-research/${id}`);
+        if (!response.ok) {
+          throw new Error(`Delete failed for ID ${id}: ${response.status}`);
+        }
+        return response.json();
+      }));
+      return results;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
-      setSelectedIds(new Set());
-      toast({
-        title: "Research Items Deleted",
-        description: `${selectedIds.size} research items removed successfully`,
-      });
+    onMutate: async (ids: number[]) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/keyword-research"] });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<KeywordResearch[]>(["/api/keyword-research"]);
+
+      // Optimistically update to the new value
+      if (previousData) {
+        queryClient.setQueryData<KeywordResearch[]>(
+          ["/api/keyword-research"], 
+          previousData.filter(item => !ids.includes(item.id))
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
     },
-    onError: (error: any) => {
+    onError: (error: any, ids: number[], context: any) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(["/api/keyword-research"], context.previousData);
+      }
       toast({
         title: "Bulk Delete Failed",
         description: error.message,
         variant: "destructive",
       });
+    },
+    onSuccess: (data, ids) => {
+      setSelectedIds(new Set());
+      toast({
+        title: "Research Items Deleted",
+        description: `${ids.length} research items removed successfully`,
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/keyword-research"] });
     },
   });
 
