@@ -398,8 +398,68 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get research history
+  app.get("/api/keyword-research", async (req, res) => {
+    try {
+      const research = await storage.getKeywordResearches();
+      res.json(research);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get specific research
+  app.get("/api/keyword-research/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const research = await storage.getKeywordResearch(id);
+      
+      if (!research) {
+        return res.status(404).json({ message: "Research not found" });
+      }
+      
+      res.json(research);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update research title
+  app.put("/api/keyword-research/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { title } = req.body;
+      
+      const success = await storage.updateKeywordResearchTitle(id, title);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Research not found" });
+      }
+      
+      res.json({ success: true, message: "Title updated successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Delete specific research
+  app.delete("/api/keyword-research/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteKeywordResearch(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Research not found" });
+      }
+      
+      res.json({ success: true, message: "Research deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   console.log("🌟 ALL API ROUTES REGISTERED SUCCESSFULLY");
-  console.log("🌟 Routes available: /api/test, /api/health, /api/bis-integration, /api/keyword-research");
+  console.log("🌟 Routes available: /api/test, /api/health, /api/bis-integration, /api/keyword-research (GET/POST/PUT/DELETE)");
   
   const httpServer = createServer(app);
   return httpServer;
