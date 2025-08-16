@@ -20,6 +20,15 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
   console.log("🌟 FIXED ROUTES LOADING:", new Date().toISOString());
   console.log("🌟 ENVIRONMENT:", app.get("env"));
   console.log("🌟 NODE_ENV:", process.env.NODE_ENV);
+  
+  // Add explicit route registration logging
+  console.log("🌟 REGISTERING API ROUTES...");
+  
+  // Test route that should ALWAYS work
+  app.get("/api/test", (req, res) => {
+    console.log("🌟 TEST ROUTE HIT!");
+    res.json({ message: "API routes are working!", timestamp: new Date().toISOString() });
+  });
 
   // Get research history
   app.get("/api/keyword-research", async (req, res) => {
@@ -48,9 +57,12 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       status: "healthy", 
       timestamp: new Date().toISOString(),
       environment: app.get("env"),
-      nodeEnv: process.env.NODE_ENV
+      nodeEnv: process.env.NODE_ENV,
+      routes: "API routes active"
     });
   });
+  
+  console.log("🌟 HEALTH ROUTE REGISTERED");
 
   // BIS Integration endpoint - for BIS app to call GSD
   app.post("/api/bis-integration", async (req, res) => {
@@ -168,6 +180,8 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  console.log("🌟 BIS INTEGRATION ROUTE REGISTERED");
 
   // Nuclear fix keyword research route
   app.post("/api/keyword-research", async (req, res) => {
@@ -384,6 +398,9 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  console.log("🌟 ALL API ROUTES REGISTERED SUCCESSFULLY");
+  console.log("🌟 Routes available: /api/test, /api/health, /api/bis-integration, /api/keyword-research");
+  
   const httpServer = createServer(app);
   return httpServer;
 }
