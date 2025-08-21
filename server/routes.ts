@@ -352,14 +352,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Industry not found" });
       }
       
-      // Generate all keyword combinations (city before AND after keyword)
+      // Generate all keyword combinations with natural language variations
       const keywordCombinations: string[] = [];
+      
+      // Create keyword variations to match real search patterns
+      const createKeywordVariations = (baseKeyword: string): string[] => {
+        const variations = [baseKeyword];
+        
+        // Add case variations for HVAC terms
+        if (baseKeyword.includes('HVAC')) {
+          variations.push(baseKeyword.replace(/HVAC/g, 'hvac'));
+        }
+        if (baseKeyword.includes('hvac')) {
+          variations.push(baseKeyword.replace(/hvac/g, 'HVAC'));
+        }
+        
+        // Add equipment type variations
+        if (baseKeyword.includes('air conditioning')) {
+          variations.push(baseKeyword.replace(/air conditioning/g, 'air conditioner'));
+          variations.push(baseKeyword.replace(/air conditioning/g, 'AC'));
+          variations.push(baseKeyword.replace(/air conditioning/g, 'ac'));
+        }
+        if (baseKeyword.includes('air conditioner')) {
+          variations.push(baseKeyword.replace(/air conditioner/g, 'air conditioning'));
+          variations.push(baseKeyword.replace(/air conditioner/g, 'AC'));
+          variations.push(baseKeyword.replace(/air conditioner/g, 'ac'));
+        }
+        if (baseKeyword.includes('AC ')) {
+          variations.push(baseKeyword.replace(/AC /g, 'ac '));
+          variations.push(baseKeyword.replace(/AC /g, 'air conditioning '));
+          variations.push(baseKeyword.replace(/AC /g, 'air conditioner '));
+        }
+        if (baseKeyword.includes('ac ')) {
+          variations.push(baseKeyword.replace(/ac /g, 'AC '));
+          variations.push(baseKeyword.replace(/ac /g, 'air conditioning '));
+          variations.push(baseKeyword.replace(/ac /g, 'air conditioner '));
+        }
+        
+        return Array.from(new Set(variations)); // Remove duplicates
+      };
+
       industryData.keywords.forEach(keyword => {
-        cities.forEach(city => {
-          // Add city after keyword: "HVAC repair Miami"
-          keywordCombinations.push(`${keyword} ${city}`);
-          // Add city before keyword: "Miami HVAC repair"
-          keywordCombinations.push(`${city} ${keyword}`);
+        const keywordVariations = createKeywordVariations(keyword);
+        
+        keywordVariations.forEach(keywordVar => {
+          cities.forEach(city => {
+            // Add city after keyword: "HVAC repair Miami"
+            keywordCombinations.push(`${keywordVar} ${city}`);
+            // Add city before keyword: "Miami HVAC repair"  
+            keywordCombinations.push(`${city} ${keywordVar}`);
+          });
         });
       });
       
