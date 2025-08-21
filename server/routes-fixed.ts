@@ -140,23 +140,42 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     console.log("🌟 Request path:", req.path);
     console.log("🌟 Request body:", req.body);
     try {
-      const { location, industry, analysisId } = req.body;
+      const { location, industry, cities, analysisId } = req.body;
       
-      console.log('BIS Integration Request:', { location, industry, analysisId });
+      console.log('BIS Integration Request:', { location, industry, cities: cities?.length, analysisId });
       
-      if (!location || !industry) {
+      if (!industry) {
         return res.status(400).json({
           success: false,
-          error: "Missing required fields: location and industry",
+          error: "Missing required field: industry",
           analysisId: analysisId
         });
       }
       
-      // Parse location (format: "City, State" or single city)
-      const cities = location.includes(',') ? [location.split(',')[0].trim()] : [location];
+      // Use cities array from BIS, fallback to location parsing if not provided
+      let targetCities;
+      if (cities && Array.isArray(cities) && cities.length > 0) {
+        targetCities = cities;
+        console.log("🌟 Using BIS cities array:", targetCities.length, "cities");
+      } else if (location) {
+        targetCities = location.includes(',') ? [location.split(',')[0].trim()] : [location];
+        console.log("🌟 Fallback to location parsing:", targetCities);
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: "Missing required fields: either 'cities' array or 'location' must be provided",
+          analysisId: analysisId
+        });
+      }
       
-      // Map industry names to our system
+      // Map industry IDs/names to our system
       const industryMapping: Record<string, string> = {
+        // Handle BIS industry IDs
+        '1': 'HVAC',
+        '2': 'Plumbing', 
+        '3': 'Electrical',
+        '4': 'Digital Marketing',
+        // Handle industry names
         'HVAC': 'HVAC',
         'Plumbing': 'Plumbing', 
         'Electrical': 'Electrical',
@@ -165,6 +184,7 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       };
       
       const mappedIndustry = industryMapping[industry] || 'HVAC';
+      console.log("🌟 Industry mapping:", industry, "->", mappedIndustry);
       
       // Make API call to our own keyword research endpoint
       console.log("🌟 Making internal API call to GSD keyword research...");
@@ -176,7 +196,7 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
         },
         body: JSON.stringify({
           industry: mappedIndustry,
-          cities: cities
+          cities: targetCities
         })
       });
       
