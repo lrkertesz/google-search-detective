@@ -185,7 +185,8 @@ export default function Admin() {
   };
 
   const handleTestApiKey = () => {
-    const keyToTest = apiKeyInput.trim() || settings?.keywordsEverywhereApiKey;
+    // Prioritize saved key over input field for testing
+    const keyToTest = settings?.keywordsEverywhereApiKey || apiKeyInput.trim();
     if (!keyToTest) {
       toast({
         title: "No API Key",
@@ -195,6 +196,13 @@ export default function Admin() {
       return;
     }
     testApiKeyMutation.mutate(keyToTest);
+  };
+
+  // Helper function to mask API key for display
+  const maskApiKey = (key: string) => {
+    if (!key) return "";
+    if (key.length <= 8) return "*".repeat(key.length);
+    return key.substring(0, 4) + "..." + key.substring(key.length - 4);
   };
 
   const handleCreateIndustry = () => {
@@ -311,12 +319,43 @@ export default function Admin() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="api-key" className="text-sm font-medium">Keywords Everywhere API Key</Label>
+              
+              {/* Show current API key status */}
+              {settings?.keywordsEverywhereApiKey && !apiKeyInput && (
+                <div className="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Key size={16} className="text-green-600" />
+                      <span className="text-sm text-green-800 font-medium">API Key Configured</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <code className="text-sm bg-green-100 px-2 py-1 rounded">
+                        {maskApiKey(settings.keywordsEverywhereApiKey)}
+                      </code>
+                      <Button
+                        onClick={handleTestApiKey}
+                        disabled={testApiKeyMutation.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="border-green-500 text-green-600 hover:bg-green-100"
+                      >
+                        <TestTube size={14} className="mr-1" />
+                        {testApiKeyMutation.isPending ? "Testing..." : "Test"}
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-green-700 mt-1">
+                    Click "Update API Key" below to change or "Test" to verify current key
+                  </p>
+                </div>
+              )}
+
               <div className="flex items-center space-x-2 mt-2">
                 <div className="relative flex-1">
                   <Input
                     id="api-key"
                     type={showApiKey ? "text" : "password"}
-                    placeholder="Enter your Keywords Everywhere API key"
+                    placeholder={settings?.keywordsEverywhereApiKey ? "Enter new API key to update" : "Enter your Keywords Everywhere API key"}
                     value={apiKeyInput}
                     onChange={(e) => setApiKeyInput(e.target.value)}
                   />
@@ -330,22 +369,24 @@ export default function Admin() {
                     {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>
                 </div>
-                <Button
-                  onClick={handleTestApiKey}
-                  disabled={testApiKeyMutation.isPending}
-                  variant="outline"
-                  className="border-blue-500 text-blue-600 hover:bg-blue-50"
-                >
-                  <TestTube size={16} className="mr-2" />
-                  {testApiKeyMutation.isPending ? "Testing..." : "Test"}
-                </Button>
+                {apiKeyInput && (
+                  <Button
+                    onClick={handleTestApiKey}
+                    disabled={testApiKeyMutation.isPending}
+                    variant="outline"
+                    className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                  >
+                    <TestTube size={16} className="mr-2" />
+                    {testApiKeyMutation.isPending ? "Testing..." : "Test"}
+                  </Button>
+                )}
                 <Button
                   onClick={handleSaveSettings}
-                  disabled={updateSettingsMutation.isPending}
+                  disabled={updateSettingsMutation.isPending || !apiKeyInput}
                   className="bg-primary hover:bg-primary-dark"
                 >
                   <Save size={16} className="mr-2" />
-                  Save
+                  {settings?.keywordsEverywhereApiKey ? "Update" : "Save"}
                 </Button>
               </div>
               {/* API Key Status */}
