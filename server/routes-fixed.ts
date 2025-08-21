@@ -231,6 +231,9 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
         keywordData: {
           primaryKeywords: keywordsWithVolume.slice(0, 10), // Top 10 with volume
           longTailKeywords: keywordsWithVolume.filter((k: KeywordResult) => k.keyword.split(' ').length > 3),
+          allKeywords: results, // ALL 1692 keywords for BIS to have complete data
+          keywordsWithVolume: keywordsWithVolume, // All keywords that have search volume
+          keywordsWithoutVolume: keywordsWithoutVolume, // All zero-volume keywords for SEO
           competitorKeywords: [], // We don't currently track competitor-specific data
           summary: {
             totalKeywords: totalKeywords,
