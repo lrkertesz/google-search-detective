@@ -1,3 +1,7 @@
+// DEPRECATED: This file has been replaced by routes-fixed.ts
+// All functionality has been moved to the enhanced routes-fixed.ts implementation
+// This file is kept for reference only and should not be used in production
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
