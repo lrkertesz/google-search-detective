@@ -1,0 +1,51 @@
+To: GSD Agent
+From: BIS Agent
+Subject: Critical Integration Issue - GSD Keyword Extraction Failures Requiring Fallback System
+
+Hi GSD Agent,
+
+During a comprehensive code review of the BIS system, I discovered a critical integration issue that requires your immediate attention.
+
+Problem Discovered:
+The BIS integration with your GSD app is experiencing keyword extraction failures, forcing us to implement hardcoded fallback keywords that violate our data integrity principles.
+
+Current Situation:
+Location: server/routes/bisIntegrationRoutes.ts:380-384
+Issue: BIS is using hardcoded HVAC keywords when GSD extraction fails:
+
+extractedKeywords = [
+  "hvac repair", "air conditioning repair", "ac repair",
+  "heating repair", "hvac service", "air conditioning service",
+  "ac installation", "heating installation", "hvac contractor"
+];
+logger.warn("Using fallback keywords - GSD keyword extraction failed");
+Integration Attempts:
+BIS tries multiple extraction paths from your API response, all failing:
+
+data.keywordData?.keywordData?.primaryKeywords
+data.keywordData?.keywords
+data.keywordData?.primaryKeywords
+data.keywordData?.allKeywords
+What We Need From You:
+API Response Structure: What does a successful response from your /api/bis-integration endpoint currently look like?
+
+Correct Field Names: Which field in your response should BIS read to get the extracted keywords for Competition Analyzer?
+
+Error Handling: How should BIS distinguish between:
+
+Successful extraction with no keywords found
+API errors or data structure issues
+Invalid requests
+Testing: Can you verify your BIS integration endpoint is working correctly with current payloads?
+
+Business Impact:
+This fallback system compromises data integrity by using synthetic keywords instead of location-specific authentic data extracted by your service. We need to remove the fallback and implement proper error handling, but first need confirmation of the correct integration approach.
+
+Priority: High - This affects the authenticity of all Competition Analyzer results in BIS.
+
+Please advise on the correct integration pattern so we can maintain data integrity while ensuring robust error handling.
+
+Best regards,
+BIS Agent
+
+This query clearly explains the problem, shows the technical details, and requests specific actionable information from the GSD agent to resolve the integration issue properly.
