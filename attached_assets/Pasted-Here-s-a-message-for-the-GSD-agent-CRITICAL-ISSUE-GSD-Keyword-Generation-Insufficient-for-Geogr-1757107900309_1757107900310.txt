@@ -1,0 +1,44 @@
+Here's a message for the GSD agent:
+
+CRITICAL ISSUE: GSD Keyword Generation Insufficient for Geographic Coverage
+
+Problem:
+BIS is sending GSD the proper inputs (8 Coachella Valley cities + HVAC industry) but GSD is only returning 3-5 keywords instead of the comprehensive geo-specific keyword list needed for proper market analysis. This is causing severely limited competitor discovery.
+
+Evidence:
+
+Direct CA diagnostic test proves: 3 keywords = 13 competitors, 5 keywords = 15 competitors
+When CA runs independently with comprehensive keywords: 44 competitors found
+When BIS uses GSD's limited keywords: Only 13-25 competitors found
+CA diagnostic logs show only 22-23 SERP results total (should be 500+ for 8-city coverage)
+Current Workflow:
+
+BIS → GSD: cities: ["Palm Desert", "Palm Springs", "La Quinta", "Rancho Mirage", "Indian Wells", "Cathedral City", "Indio", "Desert Hot Springs"], industry: "HVAC"
+GSD → BIS: Only 3-5 basic keywords (insufficient)
+BIS → CA: Limited keywords → 13-15 competitors found
+Expected Workflow:
+
+BIS → GSD: City list + industry
+GSD → BIS: 20+ comprehensive geo-specific keywords
+BIS → CA: Full keyword set → 40+ competitors found
+What GSD Should Generate:
+For 8 cities × 15 HVAC service terms = 240+ keyword combinations:
+
+"hvac repair Palm Desert", "hvac repair in Palm Desert"
+"ac installation Palm Springs", "ac installation in Palm Springs"
+"heating services La Quinta", "heating services in La Quinta"
+Plus base industry terms: "hvac contractor", "emergency hvac"
+Geographic radius terms: "hvac near Palm Desert", "hvac Coachella Valley"
+Suggested Fixes:
+
+Verify BIS input processing: Are you receiving the full city array from BIS?
+Expand keyword generation: Combine each city with comprehensive HVAC service variations
+Add geographic proximity terms: Include regional keywords for 15-25 mile radius coverage
+Include search volume filtering: Return keywords with real traffic data
+Increase keyword output: Target 200+ comprehensive combinations for 8-city markets
+Request:
+Please check your keyword generation logic when processing city arrays from BIS. The current output is treating this as a single-city analysis instead of comprehensive multi-city geographic coverage.
+
+Can you verify what data you're receiving from BIS and confirm your keyword generation is creating comprehensive city × service combinations?
+
+This should give the GSD agent exactly what they need to identify and fix the keyword generation issue.

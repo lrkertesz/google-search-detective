@@ -156,10 +156,11 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       let targetCities;
       if (cities && Array.isArray(cities) && cities.length > 0) {
         targetCities = cities;
-        console.log("🌟 Using BIS cities array:", targetCities.length, "cities");
+        console.log("🚨 BIS DIAGNOSTIC - Using BIS cities array:", targetCities.length, "cities");
+        console.log("🚨 BIS DIAGNOSTIC - Cities received from BIS:", JSON.stringify(targetCities));
       } else if (location) {
         targetCities = location.includes(',') ? [location.split(',')[0].trim()] : [location];
-        console.log("🌟 Fallback to location parsing:", targetCities);
+        console.log("🚨 BIS DIAGNOSTIC - Fallback to location parsing:", targetCities);
       } else {
         return res.status(400).json({
           success: false,
@@ -184,10 +185,18 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       };
       
       const mappedIndustry = industryMapping[industry] || 'HVAC';
-      console.log("🌟 Industry mapping:", industry, "->", mappedIndustry);
+      console.log("🚨 BIS DIAGNOSTIC - Industry mapping:", industry, "->", mappedIndustry);
+      
+      // CRITICAL: Check what we're about to send to internal GSD API
+      const gsdRequestPayload = {
+        industry: mappedIndustry,
+        cities: targetCities
+      };
+      console.log("🚨 BIS DIAGNOSTIC - About to send to GSD internal API:", JSON.stringify(gsdRequestPayload));
+      console.log("🚨 BIS DIAGNOSTIC - Expected keyword combinations: ", targetCities.length, " cities × 99 HVAC keywords × 2 variations = ", targetCities.length * 99 * 2, " keywords");
       
       // Make API call to our own keyword research endpoint
-      console.log("🌟 Making internal API call to GSD keyword research...");
+      console.log("🚨 BIS DIAGNOSTIC - Making internal API call to GSD keyword research...");
       
       const gsdResponse = await fetch(`http://localhost:5000/api/keyword-research`, {
         method: 'POST',
@@ -205,12 +214,29 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       }
       
       const gsdData = await gsdResponse.json();
-      console.log("🌟 BIS received GSD data:", gsdData.results?.length || 0, "keywords");
+      console.log("🚨 BIS DIAGNOSTIC - Raw GSD response received");
+      console.log("🚨 BIS DIAGNOSTIC - GSD data keys:", Object.keys(gsdData));
+      console.log("🚨 BIS DIAGNOSTIC - GSD results length:", gsdData.results?.length || 0);
       
       // Process GSD results into BIS format
       const results = gsdData.results || [];
+      console.log("🚨 BIS DIAGNOSTIC - Processing", results.length, "total keywords from GSD");
+      
+      // Log sample of results to see what we're working with
+      if (results.length > 0) {
+        console.log("🚨 BIS DIAGNOSTIC - Sample of first 3 keywords from GSD:");
+        results.slice(0, 3).forEach((k: KeywordResult, index: number) => {
+          console.log(`🚨 BIS DIAGNOSTIC - Sample ${index + 1}: "${k.keyword}" (volume: ${k.searchVolume}, cpc: ${k.cpc})`);
+        });
+      }
+      
       const keywordsWithVolume = results.filter((k: KeywordResult) => k.searchVolume > 0);
       const keywordsWithoutVolume = results.filter((k: KeywordResult) => k.searchVolume === 0);
+      
+      console.log("🚨 BIS DIAGNOSTIC - Keyword filtering results:");
+      console.log("🚨 BIS DIAGNOSTIC - Total keywords:", results.length);
+      console.log("🚨 BIS DIAGNOSTIC - Keywords with volume:", keywordsWithVolume.length);
+      console.log("🚨 BIS DIAGNOSTIC - Keywords without volume:", keywordsWithoutVolume.length);
       
       // Calculate summary statistics
       const totalKeywords = results.length;
@@ -221,17 +247,41 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
         ? parseFloat((keywordsWithVolume.reduce((sum: number, k: KeywordResult) => sum + k.cpc, 0) / keywordsWithVolume.length).toFixed(2))
         : 0;
       
+      // Prepare response data
+      const primaryKeywords = keywordsWithVolume.slice(0, 10);
+      const longTailKeywords = keywordsWithVolume.filter((k: KeywordResult) => k.keyword.split(' ').length > 3);
+      
+      // CRITICAL DIAGNOSTIC: Log what BIS is about to receive
+      console.log("🚨 BIS DIAGNOSTIC - FINAL RESPONSE BREAKDOWN:");
+      console.log("🚨 BIS DIAGNOSTIC - primaryKeywords (top 10 with volume):", primaryKeywords.length);
+      console.log("🚨 BIS DIAGNOSTIC - longTailKeywords (with volume, 3+ words):", longTailKeywords.length);
+      console.log("🚨 BIS DIAGNOSTIC - allKeywords (complete set):", results.length);
+      console.log("🚨 BIS DIAGNOSTIC - keywordsWithVolume (all with search volume):", keywordsWithVolume.length);
+      console.log("🚨 BIS DIAGNOSTIC - keywordsWithoutVolume (zero volume):", keywordsWithoutVolume.length);
+      
+      if (primaryKeywords.length > 0) {
+        console.log("🚨 BIS DIAGNOSTIC - Sample primaryKeywords being sent to BIS:");
+        primaryKeywords.slice(0, 3).forEach((k: KeywordResult, index: number) => {
+          console.log(`🚨 BIS DIAGNOSTIC - Primary ${index + 1}: "${k.keyword}" (${k.searchVolume} searches)`);
+        });
+      }
+      
+      if (results.length < 50) {
+        console.log("🚨 ALERT: Very low keyword count detected! Expected 1584+ keywords for 8 cities");
+        console.log("🚨 ALERT: This suggests a problem with the keyword generation or API call");
+      }
+      
       // Return standardized BIS format with GSD data
-      res.json({
+      const bisResponse = {
         success: true,
         location: location,
         industry: industry,
         analysisId: analysisId,
         gsdResearchId: gsdData.id, // GSD's internal research ID
         keywordData: {
-          primaryKeywords: keywordsWithVolume.slice(0, 10), // Top 10 with volume
-          longTailKeywords: keywordsWithVolume.filter((k: KeywordResult) => k.keyword.split(' ').length > 3),
-          allKeywords: results, // ALL 1692 keywords for BIS to have complete data
+          primaryKeywords: primaryKeywords, // Top 10 with volume
+          longTailKeywords: longTailKeywords,
+          allKeywords: results, // ALL keywords for BIS to have complete data
           keywordsWithVolume: keywordsWithVolume, // All keywords that have search volume
           keywordsWithoutVolume: keywordsWithoutVolume, // All zero-volume keywords for SEO
           competitorKeywords: [], // We don't currently track competitor-specific data
@@ -261,7 +311,10 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
           available: false,
           note: "TAM calculation currently only available for HVAC industry"
         }
-      });
+      };
+      
+      console.log("🚨 BIS DIAGNOSTIC - About to send response to BIS with", Object.keys(bisResponse.keywordData).length, "data sections");
+      res.json(bisResponse);
       
     } catch (error: any) {
       console.error('BIS Integration Error:', error);
