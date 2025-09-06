@@ -29,6 +29,7 @@ export const keywordResearches = pgTable("keyword_researches", {
   industry: text("industry").notNull(),
   cities: json("cities").$type<string[]>().notNull(),
   results: json("results").$type<KeywordResult[]>().notNull(),
+  source: text("source").notNull().default("Admin"), // Track if search came from BIS or Admin
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -52,6 +53,7 @@ export const insertKeywordResearchSchema = createInsertSchema(keywordResearches)
   industry: true,
   cities: true,
   results: true,
+  source: true,
 });
 
 export const updateKeywordResearchSchema = createInsertSchema(keywordResearches).pick({
