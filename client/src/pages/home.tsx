@@ -379,13 +379,13 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/admin">
-                <Button variant="ghost" className="flex items-center space-x-2 text-neutral-dark hover:text-gray-900">
+                <Button className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white">
                   <Settings size={16} />
                   <span>Admin</span>
                 </Button>
               </Link>
               <Link href="/history">
-                <Button variant="ghost" className="flex items-center space-x-2 text-neutral-dark hover:text-gray-900">
+                <Button className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white">
                   <History size={16} />
                   <span>Search History</span>
                 </Button>
