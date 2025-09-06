@@ -401,10 +401,9 @@ export default function Home() {
                     </span>
                   </div>
                   <Button 
-                    variant="ghost" 
                     size="sm"
                     onClick={() => window.location.href = '/api/logout'}
-                    className="flex items-center space-x-1 text-neutral-dark hover:text-gray-900"
+                    className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white"
                   >
                     <LogOut size={14} />
                     <span>Logout</span>
