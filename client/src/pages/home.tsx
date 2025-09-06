@@ -12,8 +12,9 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { exportToCSV, exportHVACTAMReport, exportAllReports } from "@/lib/csvExport";
-import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, Plus, X, Download, History, Factory, MapPin, Info, Loader2, Eye, ArrowDownWideNarrow, TrendingUp, Target, Settings, ChevronUp, ChevronDown, LogOut, User } from "lucide-react";
 import { Link } from "wouter";
 import type { KeywordResearch, KeywordResult, Industry, TAMCalculation } from "@shared/schema";
 
@@ -34,6 +35,7 @@ export default function Home() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Sorting functions
   const handleSort = (field: SortField) => {
@@ -388,7 +390,27 @@ export default function Home() {
                   <span>Search History</span>
                 </Button>
               </Link>
-
+              
+              {/* User Info and Logout */}
+              {user && (
+                <div className="flex items-center space-x-3 border-l pl-4 ml-4">
+                  <div className="flex items-center space-x-2">
+                    <User size={16} className="text-neutral-dark" />
+                    <span className="text-sm text-neutral-dark">
+                      {user.firstName} {user.lastName}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => window.location.href = '/api/logout'}
+                    className="flex items-center space-x-1 text-neutral-dark hover:text-gray-900"
+                  >
+                    <LogOut size={14} />
+                    <span>Logout</span>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
