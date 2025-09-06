@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import type { 
   InsertKeywordResearch, 
   KeywordResearch, 
@@ -90,6 +91,10 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
   console.log("🌟 ENVIRONMENT:", app.get("env"));
   console.log("🌟 NODE_ENV:", process.env.NODE_ENV);
   
+  // Setup authentication middleware
+  await setupAuth(app);
+  console.log("🌟 AUTHENTICATION SETUP COMPLETE");
+  
   // Add explicit route registration logging
   console.log("🌟 REGISTERING API ROUTES...");
   
@@ -97,6 +102,18 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
   app.get("/api/test", (req, res) => {
     console.log("🌟 TEST ROUTE HIT!");
     res.json({ message: "API routes are working!", timestamp: new Date().toISOString() });
+  });
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUserByReplitId(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
   });
 
   // Get research history

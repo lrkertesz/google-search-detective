@@ -1,11 +1,14 @@
-import { users, industries, settings, keywordResearches, type User, type InsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch, type UpdateKeywordResearch } from "@shared/schema";
+import { users, industries, settings, keywordResearches, type User, type InsertUser, type UpsertUser, type Industry, type InsertIndustry, type Settings, type InsertSettings, type KeywordResearch, type InsertKeywordResearch, type UpdateKeywordResearch } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
+  // Legacy user methods (for existing functionality)
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  // Replit auth methods (required for authentication)
+  getUserByReplitId(replitId: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
   // Industry management
   getIndustries(): Promise<Industry[]>;
   getIndustry(id: number): Promise<Industry | undefined>;
@@ -31,9 +34,24 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  async getUserByReplitId(replitId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.replitId, replitId));
     return user || undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.replitId,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
