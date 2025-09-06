@@ -205,7 +205,8 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
         },
         body: JSON.stringify({
           industry: mappedIndustry,
-          cities: targetCities
+          cities: targetCities,
+          source: "BIS"
         })
       });
       
