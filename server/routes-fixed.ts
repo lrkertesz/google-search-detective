@@ -13,14 +13,9 @@ import type {
 import { 
   insertKeywordResearchSchema, 
   insertIndustrySchema,
-  insertSettingsSchema
+  insertSettingsSchema,
+  keywordSearchRequestSchema
 } from "@shared/schema";
-
-// Schema validation
-const keywordSearchRequestSchema = z.object({
-  industry: z.string(),
-  cities: z.array(z.string()).min(1)
-});
 
 type KeywordResult = {
   keyword: string;
