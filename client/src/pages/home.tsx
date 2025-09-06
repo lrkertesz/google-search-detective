@@ -397,7 +397,7 @@ export default function Home() {
                   <div className="flex items-center space-x-2">
                     <User size={16} className="text-neutral-dark" />
                     <span className="text-sm text-neutral-dark">
-                      {user.firstName} {user.lastName}
+                      {user.firstName || ''} {user.lastName || ''}
                     </span>
                   </div>
                   <Button 
