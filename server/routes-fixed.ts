@@ -336,10 +336,11 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     
     try {
       const validatedData = keywordSearchRequestSchema.parse(req.body);
-      const { industry, cities } = validatedData;
+      const { industry, cities, source } = validatedData;
       
       console.log("🌟 Industry:", industry);
       console.log("🌟 Cities:", cities);
+      console.log("🌟 Source:", source || "Admin (default)");
       
       // Get base keywords for the industry from database
       const industryData = await storage.getIndustryByName(industry);
@@ -527,7 +528,8 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
       const savedResearch = await storage.createKeywordResearch({
         industry,
         cities,
-        results
+        results,
+        source
       });
       
       console.log("🌟 Research saved with", results.length, "keywords");

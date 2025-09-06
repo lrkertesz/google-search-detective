@@ -63,6 +63,7 @@ export const updateKeywordResearchSchema = createInsertSchema(keywordResearches)
 export const keywordSearchRequestSchema = z.object({
   industry: z.string().min(1),
   cities: z.array(z.string().min(1)),
+  source: z.string().optional().default("Admin"), // Optional, defaults to Admin for regular requests
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
