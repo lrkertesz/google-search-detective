@@ -11,9 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff, TestTube, X } from "lucide-react";
+import { Settings, Plus, Edit, Trash2, Save, Key, Factory, ArrowLeft, Eye, EyeOff, TestTube, X, Users, Calendar } from "lucide-react";
 import { Link } from "wouter";
-import type { Industry, Settings as SettingsType } from "@shared/schema";
+import type { Industry, Settings as SettingsType, User } from "@shared/schema";
 
 interface EditingIndustry extends Omit<Industry, 'keywords'> {
   keywords: string;
@@ -49,6 +49,11 @@ export default function Admin() {
   const { data: apiKeyStatus } = useQuery<ApiKeyStatus>({
     queryKey: ["/api/admin/test-current-api-key"],
     refetchInterval: false,
+  });
+
+  // Fetch users
+  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
   });
 
   // Update settings mutation
@@ -276,7 +281,7 @@ export default function Admin() {
     setEditingIndustry(null);
   };
 
-  if (industriesLoading || settingsLoading) {
+  if (industriesLoading || settingsLoading || usersLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
@@ -623,6 +628,74 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {/* User Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="text-blue-600" size={20} />
+              <span>User Management</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {usersLoading ? (
+              <div className="text-center py-8">Loading users...</div>
+            ) : users && users.length > 0 ? (
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600 mb-4">
+                  {users.length} registered user{users.length === 1 ? '' : 's'}
+                </div>
+                <div className="grid gap-4">
+                  {users.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          {user.profileImageUrl ? (
+                            <img 
+                              src={user.profileImageUrl} 
+                              alt={`${user.firstName || ''} ${user.lastName || ''}`}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <Users size={20} className="text-blue-600" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {user.firstName || user.lastName ? 
+                              `${user.firstName || ''} ${user.lastName || ''}`.trim() : 
+                              'Unknown User'
+                            }
+                          </div>
+                          <div className="text-sm text-gray-600">{user.email || 'No email'}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="flex items-center space-x-1">
+                          <Calendar size={14} />
+                          <span>
+                            {user.createdAt ? 
+                              new Date(user.createdAt).toLocaleDateString() : 
+                              'Unknown'
+                            }
+                          </span>
+                        </div>
+                        <div className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          ID: {user.replitId || user.id}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users size={48} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">No users have registered yet</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -136,6 +136,16 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User management - get all users
+  app.get("/api/admin/users", isAuthenticated, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Add a simple health check endpoint
   app.get("/api/health", async (req, res) => {
     console.log("🌟 HEALTH CHECK CALLED");

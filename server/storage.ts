@@ -9,6 +9,8 @@ export interface IStorage {
   // Replit auth methods (required for authentication)
   getUserByReplitId(replitId: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  // User management
+  getAllUsers(): Promise<User[]>;
   // Industry management
   getIndustries(): Promise<Industry[]>;
   getIndustry(id: number): Promise<Industry | undefined>;
@@ -52,6 +54,13 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
