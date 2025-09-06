@@ -105,11 +105,18 @@ export default function HistoryPage() {
   const [showZeroVolumeKeywords, setShowZeroVolumeKeywords] = useState<boolean>(false);
   const [sortField, setSortField] = useState<SortField>('searchVolume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'BIS' | 'Admin'>('all');
 
   // Get research history
   const { data: researchHistory, isLoading } = useQuery<KeywordResearch[]>({
     queryKey: ["/api/keyword-research"],
   });
+
+  // Filter research history by source
+  const filteredResearchHistory = researchHistory?.filter(research => {
+    if (sourceFilter === 'all') return true;
+    return (research as any).source === sourceFilter;
+  }) || [];
 
   // Delete research mutation
   const deleteResearchMutation = useMutation({
@@ -277,10 +284,10 @@ export default function HistoryPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === researchHistory?.length) {
+    if (selectedIds.size === filteredResearchHistory.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(researchHistory?.map(r => r.id) || []));
+      setSelectedIds(new Set(filteredResearchHistory.map(r => r.id)));
     }
   };
 
@@ -326,6 +333,14 @@ export default function HistoryPage() {
   const exportCSVWithoutVolume = (research: KeywordResearch) => {
     const keywordsWithoutVolume = research.results.filter(k => k.searchVolume === 0);
     exportToCSV(keywordsWithoutVolume, `keywords-seo-${research.industry}-${Date.now()}.csv`);
+  };
+
+  const getSourceBadge = (source: string) => {
+    const sourceValue = source || 'Admin';
+    if (sourceValue === 'BIS') {
+      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">BIS</Badge>;
+    }
+    return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Admin</Badge>;
   };
 
   // TAM Calculation Function - same as home.tsx
@@ -920,6 +935,45 @@ export default function HistoryPage() {
 
       {/* History List */}
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Source Filter Controls */}
+        {researchHistory && researchHistory.length > 0 && (
+          <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Filter by Source</h3>
+                <div className="flex space-x-2">
+                  <Button
+                    variant={sourceFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSourceFilter('all')}
+                  >
+                    All ({researchHistory.length})
+                  </Button>
+                  <Button
+                    variant={sourceFilter === 'Admin' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSourceFilter('Admin')}
+                    className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                  >
+                    Admin ({researchHistory.filter(r => !(r as any).source || (r as any).source === 'Admin').length})
+                  </Button>
+                  <Button
+                    variant={sourceFilter === 'BIS' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSourceFilter('BIS')}
+                    className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                  >
+                    BIS ({researchHistory.filter(r => (r as any).source === 'BIS').length})
+                  </Button>
+                </div>
+              </div>
+              <div className="text-sm text-gray-600">
+                Showing {filteredResearchHistory.length} of {researchHistory.length} searches
+              </div>
+            </div>
+          </div>
+        )}
+
         {!researchHistory || researchHistory.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
@@ -942,12 +996,12 @@ export default function HistoryPage() {
                   onClick={toggleSelectAll}
                   className="flex items-center space-x-2"
                 >
-                  {selectedIds.size === researchHistory.length ? 
+                  {selectedIds.size === filteredResearchHistory.length ? 
                     <CheckSquare size={16} /> : 
                     <Square size={16} />
                   }
                   <span>
-                    {selectedIds.size === researchHistory.length ? 'Deselect All' : 'Select All'}
+                    {selectedIds.size === filteredResearchHistory.length ? 'Deselect All' : 'Select All'}
                   </span>
                 </Button>
                 {selectedIds.size > 0 && (
@@ -971,7 +1025,7 @@ export default function HistoryPage() {
             </div>
 
             <div className="grid gap-6">
-            {researchHistory.map((research) => (
+            {filteredResearchHistory.map((research) => (
               <Card 
                 key={research.id} 
                 className="group cursor-pointer hover:shadow-md transition-shadow"
@@ -1060,6 +1114,9 @@ export default function HistoryPage() {
                             <span>{research.cities.length} cities</span>
                           </span>
                           <span>{research.results.length} keywords</span>
+                          <span className="flex items-center space-x-1">
+                            {getSourceBadge((research as any).source)}
+                          </span>
                         </div>
                       </div>
                     </div>
