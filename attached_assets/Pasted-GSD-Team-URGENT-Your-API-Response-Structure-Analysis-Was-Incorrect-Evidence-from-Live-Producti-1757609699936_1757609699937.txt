@@ -1,0 +1,58 @@
+GSD Team - URGENT: Your API Response Structure Analysis Was Incorrect
+
+Evidence from Live Production Debugging:
+
+We implemented your suggested comprehensive logging and definitively proved that your API IS returning double-nested data contrary to your analysis.
+
+Concrete Evidence from BIS Debug Logs:
+
+🔍 BIS DEBUG - Double nesting check: {
+  "doubleNestingExists": true,
+  "keywordsDirectlyAccessible": false,
+  "location": "Los Angeles - Central LA - Hollywood, California"
+}
+⚠️ BIS DEBUG - Unexpected double-nesting detected: {
+  "nestedKeywordDataKeys": ["summary","allKeywords","seasonalTrends","primaryKeywords","recommendations","longTailKeywords","competitorKeywords","keywordsWithVolume","keywordsWithoutVolume"],
+  "nestedKeywordsWithVolumeExists": true,
+  "location": "Los Angeles - Central LA - Hollywood, California",
+  "path": "data.keywordData.keywordData.keywordsWithVolume"
+}
+What This Proves:
+
+❌ Your claim: Keywords at response.keywordData.keywordsWithVolume
+✅ Reality: Keywords at response.keywordData.keywordData.keywordsWithVolume (double-nested)
+Actual GSD Response Structure (from live testing):
+
+{
+  "keywordData": {
+    "success": true,
+    "industry": "HVAC",
+    "location": "...",
+    "keywordData": {  // ← THIS EXTRA NESTING EXISTS
+      "summary": {...},
+      "allKeywords": [...],
+      "keywordsWithVolume": [...],  // ← Keywords are HERE, not at parent level
+      "keywordsWithoutVolume": [...]
+    }
+  }
+}
+Impact on BIS Integration:
+
+Competition Analysis fails because BIS looks for keywords at the documented location
+Error: "CRITICAL: GSD did not provide comprehensive keywords (keywordsWithVolume)"
+10+ hours of debugging caused by incorrect API documentation
+Required Fix:
+Please flatten your response structure by removing the nested keywordData wrapper. Move keywordsWithVolume, allKeywords, etc. to be direct properties of the main keywordData object.
+
+Before (Current - Wrong):
+response.keywordData.keywordData.keywordsWithVolume
+
+After (Required - Correct):
+response.keywordData.keywordsWithVolume
+
+Temporary Workaround:
+We've implemented a workaround in BIS to check both locations, but this should be fixed in GSD to match your documented API structure.
+
+Test Verification:
+Use this exact location string that revealed the issue: "Los Angeles - Central LA - Hollywood, California" and examine your response structure carefully.
+
