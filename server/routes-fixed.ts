@@ -350,6 +350,40 @@ export async function registerFixedRoutes(app: Express): Promise<Server> {
   });
   
   console.log("🌟 BIS INTEGRATION ROUTE REGISTERED");
+  
+  // DEBUG ENDPOINT: Structure verification for BIS team
+  app.get("/api/bis-structure-test", (req, res) => {
+    const sampleResponse = {
+      success: true,
+      location: "Test Location",
+      industry: "HVAC",
+      analysisId: "structure-test",
+      keywordData: {
+        primaryKeywords: [{"keyword": "test keyword", "searchVolume": 100, "cpc": 1.50}],
+        longTailKeywords: [{"keyword": "long tail test keyword", "searchVolume": 50, "cpc": 2.00}],
+        allKeywords: [{"keyword": "all test keywords", "searchVolume": 75, "cpc": 1.75}],
+        keywordsWithVolume: [{"keyword": "volume test", "searchVolume": 200, "cpc": 3.00}],
+        keywordsWithoutVolume: [{"keyword": "no volume test", "searchVolume": 0, "cpc": 0}],
+        competitorKeywords: [],
+        summary: {
+          totalKeywords: 5,
+          keywordsWithVolume: 4,
+          keywordsWithoutVolume: 1,
+          avgSearchVolume: 85,
+          avgCPC: 1.65,
+          competitionLevel: "medium"
+        },
+        seasonalTrends: {},
+        recommendations: ["Test recommendation 1", "Test recommendation 2"]
+      }
+    };
+    
+    console.log("🔍 BIS STRUCTURE TEST - Response keys:", Object.keys(sampleResponse));
+    console.log("🔍 BIS STRUCTURE TEST - keywordData keys:", Object.keys(sampleResponse.keywordData));
+    console.log("🔍 BIS STRUCTURE TEST - No double nesting detected");
+    
+    res.json(sampleResponse);
+  });
 
   // Nuclear fix keyword research route
   app.post("/api/keyword-research", async (req, res) => {

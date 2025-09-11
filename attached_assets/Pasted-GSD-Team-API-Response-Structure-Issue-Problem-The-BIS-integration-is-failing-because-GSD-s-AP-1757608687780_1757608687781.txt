@@ -1,0 +1,54 @@
+GSD Team - API Response Structure Issue
+
+Problem:
+The BIS integration is failing because GSD's API response has an unexpected nested structure that prevents proper keyword extraction for competition analysis.
+
+Current (Broken) Structure:
+GSD currently returns keywords nested one level too deep:
+
+{
+  "success": true,
+  "industry": "HVAC",
+  "location": "Los Angeles - Central LA - Hollywood, California",
+  "keywordData": {
+    "keywordData": {  // ← EXTRA NESTING LEVEL
+      "summary": "...",
+      "allKeywords": [...],
+      "keywordsWithVolume": [...]  // ← Keywords are here
+    }
+  }
+}
+Expected (Correct) Structure:
+BIS expects keywords at the direct level:
+
+{
+  "success": true,
+  "industry": "HVAC", 
+  "location": "Los Angeles - Central LA - Hollywood, California",
+  "keywordData": {
+    "summary": "...",
+    "allKeywords": [...],
+    "keywordsWithVolume": [...]  // ← Keywords should be here
+  }
+}
+Evidence from BIS Logs:
+
+nestedKeywordDataExists: true
+nestedKeywordDataKeys: ["summary","allKeywords","seasonalTrends","primaryKeywords","recommendations","longTailKeywords","competitorKeywords","keywordsWithVolume","keywordsWithoutVolume"]
+This confirms that keywordsWithVolume exists inside keywordData.keywordData instead of directly in keywordData.
+
+Impact:
+
+Competition Analysis (Step 3) fails completely
+BIS logs show: "CRITICAL: GSD did not provide comprehensive keywords (keywordsWithVolume)"
+Users see: "Competition Analysis requires comprehensive keyword data from GSD"
+Root Cause:
+It appears GSD is double-wrapping the response data by adding an extra keywordData layer, creating keywordData.keywordData.keywordsWithVolume instead of the expected keywordData.keywordsWithVolume.
+
+Requested Fix:
+Please flatten the response structure by removing the nested keywordData wrapper. The keywordsWithVolume, allKeywords, summary, etc. should be direct properties of the main keywordData object.
+
+Testing:
+After the fix, BIS should be able to access keywords directly at response.keywordData.keywordsWithVolume and the competition analysis workflow should complete successfully.
+
+This message clearly identifies the structural issue and provides the exact fix needed without requiring BIS to accommodate multiple data formats.
